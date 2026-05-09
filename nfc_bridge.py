@@ -71,7 +71,8 @@ def find_port():
 
     print("Найдены COM-порты:")
     for p in ports:
-        print(f"  {p.device:10s} — {p.description}")
+        # Исправка: используем :<15 для совместимости с длинными портами Linux
+        print(f"  {p.device:<15} — {p.description}")
 
     keywords = [
         "arduino", "ch340", "ch341", "cp210", "ftdi",
@@ -130,6 +131,38 @@ def send_uid(uid: str) -> bool:
 
 # ── Основной цикл ─────────────────────────────────────────────
 
+def wait_for_arduino_ready(ser, timeout=5):
+    """
+    Ожидает от Arduino сигнала READY с очисткой буфера.
+    Возвращает True если Arduino готовой, False если timeout.
+    """
+    print("[Init] Ожидаю инициализации Arduino...")
+    ser.reset_input_buffer()  # Очищаем буфер от мусора
+    time.sleep(0.5)
+    
+    start = time.time()
+    while time.time() - start < timeout:
+        try:
+            if ser.in_waiting:
+                raw = ser.readline()
+                try:
+                    line = raw.decode("utf-8", errors="replace").strip()
+                    if line:
+                        print(f"[Init] {line}")
+                        if "READY" in line:
+                            print("[Init] ✓ Arduino готовой!")
+                            return True
+                except Exception:
+                    pass
+        except Exception as e:
+            print(f"[!] Ошибка при ожидании READY: {e}")
+        
+        time.sleep(0.1)
+    
+    print("[!] Timeout: Arduino не ответил сигналом READY")
+    return False
+
+
 def run(port: str) -> bool:
     print(f"\n[RC522] Подключаюсь к {port} @ {BAUD_RATE} бод...")
     try:
@@ -138,12 +171,22 @@ def run(port: str) -> bool:
         print(f"[!] Не удалось открыть {port}: {e}")
         return False
 
+    # Даём Arduino время на перезагрузку и инициализацию
+    time.sleep(2)
+    
+    # Ожидаем сигнала READY
+    if not wait_for_arduino_ready(ser, timeout=5):
+        print("[!] Arduino не инициализировалась, переподключаюсь...")
+        ser.close()
+        return False
+
     print(f"[RC522] Подключён! Ожидаю карты...")
     print(f"        Поднесите карту к считывателю...\n")
-    time.sleep(2)  # ждём setup() на Arduino
 
     last_uid      = ""
     last_uid_time = 0.0
+    no_data_count = 0  # счётчик timeout'ов
+    MAX_TIMEOUTS  = 60  # если 60 раз подряд нет данных, переподключаемся
 
     try:
         while True:
@@ -154,7 +197,15 @@ def run(port: str) -> bool:
                 break
 
             if not raw:
+                # Timeout - нет данных
+                no_data_count += 1
+                if no_data_count > MAX_TIMEOUTS:
+                    print(f"[!] Слишком много timeout'ов ({MAX_TIMEOUTS}), переподключаюсь...")
+                    break
                 continue
+            
+            # Данные получены - сбрасываем счётчик
+            no_data_count = 0
 
             try:
                 line = raw.decode("utf-8", errors="replace").strip()
@@ -213,9 +264,12 @@ def main():
 
     # Цикл переподключения
     while True:
-        run(port)
-        print(f"\n[RC522] Переподключение через {RETRY_DELAY} сек...")
-        time.sleep(RETRY_DELAY)
+        ok = run(port)
+        if not ok:
+            print(f"\n[RC522] Переподключение через {RETRY_DELAY} сек...")
+            time.sleep(RETRY_DELAY)
+        else:
+            break
 
 
 if __name__ == "__main__":
