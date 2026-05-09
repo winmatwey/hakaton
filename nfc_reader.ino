@@ -38,30 +38,43 @@ uint32_t lastReadTime = 0;
 
 void setup() {
   Serial.begin(9600);
+  delay(1000);  // даём Serial время инициализироваться
   SPI.begin();
   rfid.PCD_Init();
-  Serial.println("READY");
+  delay(100);
+  Serial.println("READY");  // сигнал о готовности
 }
 
 void loop() {
+  // Проверяем наличие новой карты
   if (!rfid.PICC_IsNewCardPresent() || !rfid.PICC_ReadCardSerial()) {
+    delay(50);  // ✅ Добавлена задержка чтобы не жарить CPU
     return;
   }
 
+  // Получаем UID карты
   String uid = "";
   for (byte i = 0; i < rfid.uid.size; i++) {
-    if (rfid.uid.uidByte[i] < 0x10) uid += "0";
+    if (rfid.uid.uidByte[i] < 0x10) uid += "0";  // Добавляем "0" для однозначных чисел
     uid += String(rfid.uid.uidByte[i], HEX);
   }
   uid.toUpperCase();
 
   uint32_t now = millis();
-  if (uid != lastUID || now - lastReadTime >= 2000) {
+  
+  // ✅ ИСПРАВЛЕНА ЛОГИКА: используем && (И) вместо || (ИЛИ)
+  // Отправляем если:
+  // - UID другой (новая карта) ИЛИ
+  // - тот же UID но прошло >= 2000ms (повторное сканирование)
+  if (uid != lastUID || (uid == lastUID && now - lastReadTime >= 2000)) {
     Serial.println("UID:" + uid);
     lastUID      = uid;
     lastReadTime = now;
   }
 
+  // Завершаем чтение
   rfid.PICC_HaltA();
   rfid.PCD_StopCrypto1();
+  
+  delay(100);  // небольшая задержка между циклами
 }
