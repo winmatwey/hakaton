@@ -213,12 +213,9 @@ def main():
 
     # Цикл переподключения
     while True:
-        ok = run(port)
-        if not ok:
-            print(f"\n[RC522] Переподключение через {RETRY_DELAY} сек...")
-            time.sleep(RETRY_DELAY)
-        else:
-            break
+        run(port)
+        print(f"\n[RC522] Переподключение через {RETRY_DELAY} сек...")
+        time.sleep(RETRY_DELAY)
 
 
 if __name__ == "__main__":
