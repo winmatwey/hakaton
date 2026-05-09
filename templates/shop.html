@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Магазин — Инженерный Хакатон</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Exo+2:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07101a;--s1:#0e1c2a;--s2:#132334;--bd:#1e3a5f;--ac:#00d4ff;--a2:#ff6b35;--gr:#00e676;--yw:#ffd600;--rd:#ef5350;--pu:#ce93d8;--tx:#e2e8f0;--mt:#4a6080}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:'Exo 2',sans-serif;min-height:100vh;display:flex;flex-direction:column}
+header{background:var(--s1);border-bottom:2px solid var(--ac);padding:12px 20px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50}
+header h1{font-family:'Orbitron',sans-serif;font-size:16px;font-weight:900;color:var(--ac)}
+.badge{padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;background:rgba(0,212,255,.1);border:1px solid var(--ac);color:var(--ac)}
+.nfc-badge{background:rgba(206,147,216,.1);border-color:var(--pu);color:var(--pu);display:none}
+.oc{background:var(--a2);color:#fff;min-width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.logout{margin-left:auto;background:rgba(255,107,53,.1);border:1px solid var(--a2);color:var(--a2);padding:7px 14px;border-radius:8px;cursor:pointer;font-size:12px;text-decoration:none}
+.layout{display:grid;grid-template-columns:1fr 360px;flex:1;min-height:0}
+.left{overflow-y:auto;padding:18px;border-right:1px solid var(--bd)}
+.right{display:flex;flex-direction:column;overflow:hidden}
+/* MODE TABS */
+.mtabs{display:flex;gap:8px;margin-bottom:18px}
+.mt{flex:1;padding:11px 8px;border-radius:10px;border:1px solid var(--bd);background:transparent;color:var(--mt);font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer;text-transform:uppercase;text-align:center;line-height:1.5;transition:all .2s}
+.mt.on.nm{background:rgba(206,147,216,.1);border-color:var(--pu);color:var(--pu)}
+.mt.on.mm{background:rgba(0,212,255,.1);border-color:var(--ac);color:var(--ac)}
+/* STEPS */
+.steps{display:flex;margin-bottom:18px;position:relative}
+.steps::before{content:'';position:absolute;top:15px;left:16px;right:16px;height:2px;background:var(--bd);z-index:0}
+.steps[data-s="2"]::before{background:linear-gradient(90deg,var(--gr) 33%,var(--bd) 33%)}
+.steps[data-s="3"]::before{background:linear-gradient(90deg,var(--gr) 66%,var(--bd) 66%)}
+.steps[data-s="4"]::before{background:var(--gr)}
+.step{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;position:relative;z-index:1}
+.sdot{width:30px;height:30px;border-radius:50%;border:2px solid var(--bd);background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .3s}
+.step.act .sdot{border-color:var(--pu);background:rgba(206,147,216,.15);box-shadow:0 0 10px rgba(206,147,216,.4)}
+.step.done .sdot{border-color:var(--gr);background:rgba(0,230,118,.15)}
+.slbl{font-size:10px;color:var(--mt)}
+.step.act .slbl{color:var(--pu)}.step.done .slbl{color:var(--gr)}
+/* SCAN BOX */
+.sbox{background:var(--s1);border:2px dashed var(--bd);border-radius:13px;padding:20px;text-align:center;margin-bottom:14px;transition:all .3s}
+.sbox.blue{border-color:var(--ac);background:rgba(0,212,255,.03)}
+.sbox.green{border-color:var(--gr);background:rgba(0,230,118,.03)}
+.sbox.purple{border-color:var(--pu);background:rgba(206,147,216,.03)}
+.sbox.red{border-color:var(--rd)}
+.sicon{font-size:36px;margin-bottom:8px}
+.sdesc{color:var(--mt);font-size:13px;margin-bottom:12px;line-height:1.5}
+.srow{display:flex;gap:8px}
+.si{flex:1;padding:10px 13px;background:rgba(255,255,255,.05);border:1px solid var(--bd);border-radius:8px;color:var(--tx);font-family:'Exo 2',sans-serif;font-size:14px;outline:none}
+.si:focus{border-color:var(--ac)}
+.sb{padding:10px 16px;background:linear-gradient(135deg,var(--ac),#007090);border:none;border-radius:8px;color:#000;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}
+.sb:hover{opacity:.9}
+.serr{color:var(--rd);font-size:12px;margin-top:7px;display:none}
+/* NFC RING */
+.nring{width:80px;height:80px;border-radius:50%;border:3px solid var(--pu);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:32px;position:relative;animation:rp 2s ease-in-out infinite}
+.nring::before,.nring::after{content:'';position:absolute;border-radius:50%;border:2px solid rgba(206,147,216,.3);animation:re 2s ease-out infinite}
+.nring::before{width:100px;height:100px}
+.nring::after{width:120px;height:120px;animation-delay:.4s}
+@keyframes rp{0%,100%{box-shadow:0 0 12px rgba(206,147,216,.4)}50%{box-shadow:0 0 28px rgba(206,147,216,.8)}}
+@keyframes re{0%{opacity:.8;transform:scale(.8)}100%{opacity:0;transform:scale(1.5)}}
+.nuid{font-family:monospace;color:var(--ac);font-size:12px;letter-spacing:2px;margin-top:6px}
+/* TEAM CARD */
+.tcard{background:rgba(0,230,118,.06);border:1px solid var(--gr);border-radius:11px;padding:13px 15px;margin-bottom:12px;display:none;align-items:center;gap:10px}
+.tcard.show{display:flex}
+.tnm{font-weight:700;font-size:15px}
+.tmeta{color:var(--mt);font-size:12px;margin-top:2px}
+.tbal{font-family:'Orbitron',sans-serif;font-size:19px;font-weight:900;color:var(--gr)}
+.pb2{padding:2px 7px;border-radius:7px;font-size:10px;font-weight:700}
+.pb-nfc{background:rgba(206,147,216,.15);color:var(--pu);border:1px solid rgba(206,147,216,.4)}
+.pb-man{background:rgba(0,212,255,.1);color:var(--ac);border:1px solid rgba(0,212,255,.3)}
+/* BARCODE RESULT */
+.bcres{background:rgba(0,212,255,.06);border:1px solid var(--ac);border-radius:10px;padding:12px;margin-bottom:12px;display:none;align-items:center;gap:10px}
+.bcres.show{display:flex}
+/* CART */
+.ci{display:flex;align-items:center;gap:7px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+.cin{flex:1}.ciq{color:var(--mt);min-width:26px;text-align:center}.cic{color:var(--a2);font-weight:700;min-width:55px;text-align:right}
+.cirm{background:none;border:none;color:var(--mt);cursor:pointer;font-size:15px;padding:0 3px;line-height:1}
+.cirm:hover{color:var(--rd)}
+.ctotal{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid var(--bd)}
+.ctlbl{font-size:13px;color:var(--mt)}.ctval{font-family:'Orbitron',sans-serif;font-size:20px;font-weight:900;color:var(--yw)}
+.pbtn{width:100%;padding:14px;border:none;border-radius:10px;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:900;letter-spacing:1px;cursor:pointer;margin-top:8px;transition:all .2s}
+.pbtn.nfc{background:linear-gradient(135deg,var(--pu),#ab47bc);color:#000}
+.pbtn.nfc:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 5px 16px rgba(206,147,216,.4)}
+.pbtn.man{background:linear-gradient(135deg,var(--gr),#00c853);color:#000}
+.pbtn.man:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 5px 16px rgba(0,230,118,.4)}
+.pbtn:disabled{opacity:.35;cursor:default;transform:none}
+.cempty{color:var(--mt);text-align:center;padding:16px 0;font-size:13px}
+/* ITEMS GRID */
+.igrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.ic{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:12px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+.ic:hover:not(.oos){border-color:var(--ac);transform:translateY(-1px)}
+.ic.oos{opacity:.4;cursor:default}
+.ie{font-size:28px;margin-bottom:5px}
+.iname{font-size:12px;font-weight:700;margin-bottom:3px}
+.iprice{color:var(--ac);font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700}
+.istock{color:var(--mt);font-size:10px;margin-top:3px}
+.qrow{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:8px}
+.qb{width:25px;height:25px;border-radius:50%;background:rgba(255,255,255,.07);border:1px solid var(--bd);color:var(--tx);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;line-height:1}
+.qb:hover{background:var(--ac);color:#000;border-color:var(--ac)}
+.qv{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;min-width:18px;text-align:center}
+.icd{position:absolute;top:6px;right:6px;width:17px;height:17px;border-radius:50%;background:var(--ac);color:#000;font-size:9px;font-weight:700;display:none;align-items:center;justify-content:center}
+/* CANCEL BUTTON */
+.cnbtn{padding:7px 16px;background:rgba(255,255,255,.05);border:1px solid var(--bd);color:var(--mt);border-radius:8px;cursor:pointer;font-size:12px;margin-top:10px;display:block;width:100%}
+.cnbtn:hover{border-color:var(--rd);color:var(--rd)}
+/* RIGHT: ORDERS */
+.rh{padding:12px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.01)}
+.rh h2{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+.ol{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
+/* RESERVATIONS PANEL */
+.res-panel{border-top:1px solid var(--bd)}
+/* ORDER CARD */
+.ocard{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:12px;animation:si .3s ease}
+@keyframes si{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.ocard.new-ord{border-color:var(--yw);background:rgba(255,214,0,.03)}
+.ocard.nfc-ord{border-color:var(--pu);background:rgba(206,147,216,.03)}
+.otp{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.otm{font-weight:700;font-size:14px}.oti{color:var(--mt);font-size:11px}
+.opy{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 7px;border-radius:7px;margin-bottom:7px}
+.opy.nfc{background:rgba(206,147,216,.1);color:var(--pu);border:1px solid rgba(206,147,216,.3)}
+.opy.man{background:rgba(0,212,255,.08);color:var(--ac);border:1px solid rgba(0,212,255,.2)}
+.odt{font-size:12px;color:var(--mt);margin-bottom:7px}
+.odt span{color:var(--tx)}
+.isb{width:100%;padding:7px;background:rgba(0,230,118,.08);border:1px solid var(--gr);color:var(--gr);border-radius:7px;cursor:pointer;font-size:12px;font-weight:600}
+.isb:hover{background:rgba(0,230,118,.18)}
+/* RESERVATION CARD IN RIGHT PANEL */
+.rcard{background:var(--s1);border:1px solid var(--ac);border-radius:10px;padding:12px;animation:si .3s ease}
+.rcard .rteam{font-weight:700;font-size:14px;margin-bottom:6px}
+.rcard .ritems{font-size:12px;color:var(--mt);margin-bottom:6px}
+.rcard .rbot{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.rcard .rtot{font-family:'Orbitron',sans-serif;font-size:13px;color:var(--yw)}
+.rexp{font-family:monospace;font-size:11px;padding:2px 7px;border-radius:6px;font-weight:700}
+.rexp.ok{color:var(--gr);background:rgba(0,230,118,.1)}.rexp.warn{color:var(--yw);background:rgba(255,214,0,.1)}.rexp.danger{color:var(--rd);background:rgba(239,83,80,.12)}
+.pay-res-btn{width:100%;padding:7px;background:rgba(206,147,216,.08);border:1px solid var(--pu);color:var(--pu);border-radius:7px;cursor:pointer;font-size:12px;font-weight:600;margin-bottom:5px}
+.pay-res-btn:hover{background:rgba(206,147,216,.18)}
+.noo{text-align:center;padding:30px 20px;color:var(--mt)}
+.noo .noi{font-size:32px;margin-bottom:8px}
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;z-index:999;background:var(--s1);border:1px solid var(--bd);border-radius:11px;padding:12px 20px;font-size:13px;box-shadow:0 8px 28px rgba(0,0,0,.5);transform:translateX(120%);transition:transform .3s cubic-bezier(.16,1,.3,1);max-width:300px}
+.toast.show{transform:translateX(0)}
+.toast.ok{border-color:var(--gr)}.toast.err{border-color:var(--rd)}.toast.nfc{border-color:var(--pu)}
+@media(max-width:800px){.layout{grid-template-columns:1fr}.right{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <span style="font-size:22px">🏪</span>
+  <h1>МАГАЗИН</h1>
+  <span class="badge">Кладовщик</span>
+  <span class="badge nfc-badge" id="nfcBadge">📡 NFC активен</span>
+  <span style="color:var(--mt);font-size:13px">Новые: <span class="oc" id="oc">0</span></span>
+  <a href="/logout" class="logout">Выйти</a>
+</header>
+
+<div class="layout">
+  <div class="left">
+    <div class="mtabs">
+      <button class="mt nm" onclick="setMode('nfc')">📡 NFC + Баркод<br><span style="font-size:9px;opacity:.7">Сканер + NFC карта</span></button>
+      <button class="mt mm" onclick="setMode('manual')">⌨️ Ручной режим<br><span style="font-size:9px;opacity:.7">Поиск команды вручную</span></button>
+    </div>
+
+    <!-- NFC MODE -->
+    <div id="NF">
+      <div class="steps" id="stepsBar" data-s="1">
+        <div class="step act" id="st1"><div class="sdot">📦</div><div class="slbl">1. Товар</div></div>
+        <div class="step" id="st2"><div class="sdot">💳</div><div class="slbl">2. NFC</div></div>
+        <div class="step" id="st3"><div class="sdot">✅</div><div class="slbl">3. Готово</div></div>
+      </div>
+
+      <!-- STEP 1: BARCODE -->
+      <div id="P1">
+        <div class="sbox blue" id="bcBox">
+          <div class="sicon">📷</div>
+          <div class="sdesc">Сканируйте штрих-код товара или введите код вручную.<br>Можно добавить несколько товаров.</div>
+          <div class="srow">
+            <input class="si" id="bcIn" placeholder="Штрих-код (ITEM001...)" autocomplete="off">
+            <button class="sb" onclick="scanBC()">СКАН</button>
+          </div>
+          <div class="serr" id="bcErr"></div>
+        </div>
+        <div class="bcres" id="bcRes">
+          <span style="font-size:26px" id="bcEm">📦</span>
+          <div style="flex:1">
+            <div style="font-weight:700" id="bcNm"></div>
+            <div style="color:var(--mt);font-size:12px;margin-top:2px" id="bcMt"></div>
+          </div>
+          <div>
+            <div style="color:var(--ac);font-family:'Orbitron',sans-serif;font-size:15px;font-weight:700" id="bcPr"></div>
+            <div class="qrow" style="margin-top:6px">
+              <button class="qb" onclick="bcQ(-1)">−</button>
+              <span class="qv" id="bcQv">1</span>
+              <button class="qb" onclick="bcQ(1)">+</button>
+            </div>
+            <button class="sb" style="width:100%;margin-top:8px;padding:8px;font-size:10px" onclick="addBcToCart()">+ В КОРЗИНУ</button>
+          </div>
+        </div>
+        <div id="nfcCartDiv"></div>
+        <button class="pbtn nfc" id="toNfcBtn" disabled onclick="goStep2()">💳 К NFC оплате →</button>
+      </div>
+
+      <!-- STEP 2: WAIT NFC -->
+      <div id="P2" style="display:none">
+        <div class="sbox purple" style="padding:28px">
+          <div class="nring">📡</div>
+          <div style="font-family:'Orbitron',sans-serif;font-size:14px;color:var(--pu);margin-bottom:5px">ОЖИДАНИЕ КАРТЫ</div>
+          <div style="color:var(--mt);font-size:13px">Команда прикладывает NFC карту к считывателю</div>
+          <div class="nuid" id="nfcUidLbl"></div>
+          <button class="cnbtn" onclick="goStep1()">← Отмена</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: CONFIRM -->
+      <div id="P3" style="display:none">
+        <div class="tcard show" id="cfTeam">
+          <div style="font-size:24px">💳</div>
+          <div style="flex:1">
+            <div class="tnm" id="cfNm"></div>
+            <div class="tmeta" id="cfMt"></div>
+          </div>
+          <div class="tbal" id="cfBal"></div>
+        </div>
+        <div id="cfCartDiv"></div>
+        <div class="ctotal"><span class="ctlbl">Итого к списанию:</span><span class="ctval" id="cfTot"></span></div>
+        <button class="pbtn nfc" id="cfBtn" onclick="doNfcPay()">💳 СПИСАТЬ С NFC КАРТЫ</button>
+        <button class="cnbtn" onclick="resetNfc()">Отменить покупку</button>
+      </div>
+
+      <!-- STEP 4: DONE -->
+      <div id="P4" style="display:none">
+        <div class="sbox green" style="padding:28px;text-align:center">
+          <div style="font-size:48px;margin-bottom:10px">✅</div>
+          <div style="font-family:'Orbitron',sans-serif;font-size:17px;color:var(--gr);margin-bottom:7px">ОПЛАТА ПРОШЛА!</div>
+          <div id="doneMsg" style="color:var(--mt);font-size:13px;margin-bottom:16px"></div>
+          <button class="sb" onclick="resetNfc()" style="padding:11px 28px">← Новая покупка</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MANUAL MODE -->
+    <div id="MF" style="display:none">
+      <div class="sbox" id="mBox">
+        <div class="sicon">👥</div>
+        <div class="sdesc">Введите название команды или просканируйте её штрих-код.</div>
+        <div class="srow">
+          <input class="si" id="mIn" placeholder="Название команды..." autocomplete="off">
+          <button class="sb" onclick="mScan()">Найти</button>
+        </div>
+        <div class="serr" id="mErr"></div>
+      </div>
+      <div class="tcard" id="mTeamCard">
+        <div style="font-size:24px">👥</div>
+        <div style="flex:1"><div class="tnm" id="mTNm"></div><div class="tmeta" id="mTMt"></div></div>
+        <div class="tbal" id="mTBl"></div>
+      </div>
+      <div id="mItems" style="display:none">
+        <div style="font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--mt);margin-bottom:10px">🛒 Выберите товары</div>
+        <div class="igrid" id="mGrid"></div>
+        <div id="mCartDiv"></div>
+        <div class="ctotal" id="mTotRow" style="display:none"><span class="ctlbl">Итого:</span><span class="ctval" id="mTotVal"></span></div>
+        <button class="pbtn man" id="mPayBtn" disabled onclick="doManualPay()">✓ ОФОРМИТЬ ПОКУПКУ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: ORDERS + RESERVATIONS -->
+  <div class="right">
+    <div style="flex:1;display:flex;flex-direction:column;min-height:0">
+      <div class="rh"><span>📦</span><h2>Новые заказы</h2><span style="margin-left:auto;font-size:11px;color:var(--mt)">обновл. 5с</span></div>
+      <div class="ol" id="OL" style="max-height:45vh"><div class="noo"><div class="noi">📭</div><p>Нет новых заказов</p></div></div>
+    </div>
+    <div class="res-panel" style="flex:1;display:flex;flex-direction:column;min-height:0">
+      <div class="rh"><span>📋</span><h2>Активные брони</h2><span style="margin-left:auto;font-size:11px;color:var(--mt)">обновл. 5с</span></div>
+      <div class="ol" id="RL" style="max-height:45vh"><div class="noo"><div class="noi">📋</div><p>Нет броней</p></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var mode='nfc', nfcCart={}, mCart={}, mItems=[], mTeam=null;
+var nfcUid=null, pollTs=0, polling=false, step=1;
+var pendingResIds=null, pendingResTeam=null;
+var lastBcItem=null;
+
+/* ── MODE ── */
+function setMode(m) {
+  mode=m;
+  document.getElementById('NF').style.display=m==='nfc'?'block':'none';
+  document.getElementById('MF').style.display=m==='manual'?'block':'none';
+  document.querySelectorAll('.mt').forEach(function(t){t.classList.remove('on');});
+  document.querySelectorAll('.mt.'+m[0]+'m').forEach(function(t){t.classList.add('on');});
+  if(m==='nfc') startPoll(); else stopPoll();
+}
+
+/* ── NFC POLL ── */
+var _pt=null;
+function startPoll(){if(polling)return;polling=true;document.getElementById('nfcBadge').style.display='';_pl();}
+function stopPoll(){polling=false;clearTimeout(_pt);document.getElementById('nfcBadge').style.display='none';}
+async function _pl(){
+  if(!polling)return;
+  if(step===2){
+    try{
+      var r=await fetch('/api/nfc/poll?since='+pollTs);
+      var d=await r.json();
+      if(d.ok){
+        pollTs=d.ts;
+        document.getElementById('nfcUidLbl').textContent='UID: '+d.uid;
+        if(d.unbound) toast('⚠️ Карта '+d.uid+' не привязана','err');
+        else if(d.team){
+          if(pendingResIds) doResPayment(d.uid,pendingResIds,pendingResTeam);
+          else onCard(d.uid,d.team);
+        }
+      }
+    }catch(e){}
+  }
+  _pt=setTimeout(_pl,1500);
+}
+
+/* ── BARCODE ── */
+document.getElementById('bcIn').addEventListener('keydown',function(e){if(e.key==='Enter')scanBC();});
+async function scanBC(){
+  var code=document.getElementById('bcIn').value.trim(); if(!code)return;
+  var err=document.getElementById('bcErr'); err.style.display='none';
+  var r=await fetch('/api/shop/barcode/'+encodeURIComponent(code));
+  var d=await r.json();
+  if(!d.ok){err.textContent=d.error;err.style.display='block';flashBox('bcBox','red','blue');return;}
+  lastBcItem=d.item;
+  document.getElementById('bcRes').classList.add('show');
+  document.getElementById('bcEm').textContent=emoji(d.item.name);
+  document.getElementById('bcNm').textContent=d.item.name;
+  document.getElementById('bcMt').textContent='Склад: '+d.item.stock+' шт · '+d.item.weight+'г';
+  document.getElementById('bcPr').textContent=d.item.price+' оч.';
+  document.getElementById('bcQv').textContent='1';
+  document.getElementById('bcIn').value='';
+  flashBox('bcBox','green','blue');
+  document.getElementById('bcIn').focus();
+}
+function bcQ(d){if(!lastBcItem)return;var el=document.getElementById('bcQv');el.textContent=Math.max(1,Math.min(lastBcItem.available||lastBcItem.stock,parseInt(el.textContent)+d));}
+function addBcToCart(){
+  if(!lastBcItem)return;
+  var qty=parseInt(document.getElementById('bcQv').textContent);
+  var id=lastBcItem.id;
+  if(!nfcCart[id]) nfcCart[id]={...lastBcItem,qty:0};
+  nfcCart[id].qty=Math.min(lastBcItem.available||lastBcItem.stock,nfcCart[id].qty+qty);
+  document.getElementById('bcRes').classList.remove('show');
+  lastBcItem=null;
+  renderNfcCart();
+  toast('📦 Добавлено в корзину','ok');
+}
+function renderNfcCart(){
+  var el=document.getElementById('nfcCartDiv');
+  var btn=document.getElementById('toNfcBtn');
+  var entries=Object.entries(nfcCart).filter(function(e){return e[1].qty>0;});
+  if(!entries.length){el.innerHTML='<div style="color:var(--mt);text-align:center;padding:14px 0;font-size:13px">Корзина пуста</div>';btn.disabled=true;return;}
+  var total=0,html='';
+  entries.forEach(function(e){var id=e[0],v=e[1];var c=v.price*v.qty;total+=c;html+='<div class="ci"><span class="cin">'+v.name+'</span><span class="ciq">×'+v.qty+'</span><span class="cic">−'+c+' оч.</span><button class="cirm" onclick="rmNfc('+id+')">✕</button></div>';});
+  el.innerHTML=html+'<div class="ctotal"><span class="ctlbl">Итого:</span><span class="ctval">'+total+' оч.</span></div>';
+  btn.disabled=false;
+}
+function rmNfc(id){delete nfcCart[id];renderNfcCart();}
+
+/* ── STEPS ── */
+function goStep1(){showStep(1);}
+function goStep2(){if(!Object.values(nfcCart).some(function(v){return v.qty>0;}))return;showStep(2);startPoll();}
+function showStep(n){
+  step=n;
+  ['P1','P2','P3','P4'].forEach(function(id,i){document.getElementById(id).style.display=i===n-1?'block':'none';});
+  document.getElementById('stepsBar').dataset.s=n;
+  for(var i=1;i<=3;i++){var s=document.getElementById('st'+i);s.className='step'+(i<n?' done':i===n?' act':'');}
+  if(n===2){document.getElementById('nfcUidLbl').textContent='';startPoll();}
+}
+function onCard(uid,team){
+  nfcUid=uid;
+  document.getElementById('cfNm').textContent=team.name;
+  document.getElementById('cfMt').textContent=team.class+' кл. · '+uid;
+  document.getElementById('cfBal').textContent=team.balance+' оч.';
+  var entries=Object.entries(nfcCart).filter(function(e){return e[1].qty>0;});
+  var html='',total=0;
+  entries.forEach(function(e){var v=e[1];var c=v.price*v.qty;total+=c;html+='<div class="ci"><span class="cin">'+v.name+'</span><span class="ciq">×'+v.qty+'</span><span class="cic">−'+c+'</span></div>';});
+  document.getElementById('cfCartDiv').innerHTML=html;
+  document.getElementById('cfTot').textContent=total+' оч.';
+  showStep(3);
+  toast('💳 Карта: '+team.name,'nfc');
+}
+async function doNfcPay(){
+  if(!nfcUid)return;
+  var btn=document.getElementById('cfBtn');btn.disabled=true;btn.textContent='⏳...';
+  var cart=Object.entries(nfcCart).filter(function(e){return e[1].qty>0;}).map(function(e){return{item_id:parseInt(e[0]),quantity:e[1].qty};});
+  var r=await fetch('/api/shop/nfc_buy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:nfcUid,cart:cart})});
+  var d=await r.json();
+  btn.disabled=false;btn.textContent='💳 СПИСАТЬ С NFC КАРТЫ';
+  if(d.ok){document.getElementById('doneMsg').textContent='Команда «'+d.team+'» · −'+d.total+' оч. · Баланс: '+d.new_balance+' оч.';showStep(4);toast('✅ −'+d.total+' оч.','nfc');loadOrders();loadRes();resetNfc();}
+  else toast('✗ '+d.error,'err');
+}
+function resetNfc(){nfcCart={};nfcUid=null;lastBcItem=null;pendingResIds=null;pendingResTeam=null;document.getElementById('bcRes').classList.remove('show');renderNfcCart();showStep(1);}
+
+/* ── PAY RESERVATION ── */
+function startResPay(resIds,teamName){pendingResIds=resIds;pendingResTeam=teamName;nfcCart={};setMode('nfc');showStep(2);document.getElementById('nfcUidLbl').textContent='Оплата брони: '+teamName;}
+async function doResPayment(uid,resIds,teamName){
+  var r=await fetch('/api/shop/pay_reservation',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reservation_ids:resIds,payment_method:'NFC',uid:uid})});
+  var d=await r.json();
+  pendingResIds=null;pendingResTeam=null;
+  if(d.ok){document.getElementById('doneMsg').textContent='Бронь «'+d.team+'» оплачена · −'+d.total+' оч. · Баланс: '+d.new_balance+' оч.';showStep(4);toast('✅ Бронь оплачена! −'+d.total+' оч.','nfc');loadOrders();loadRes();pendingResIds=null;pendingResTeam=null;}
+  else{toast('✗ '+d.error,'err');showStep(1);}
+}
+
+/* ── MANUAL MODE ── */
+document.getElementById('mIn').addEventListener('keydown',function(e){if(e.key==='Enter')mScan();});
+async function mScan(){
+  var tl=document.getElementById('mIn').value.trim();if(!tl)return;
+  var err=document.getElementById('mErr');err.style.display='none';
+  var r=await fetch('/api/shop/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({team_login:tl})});
+  var d=await r.json();
+  if(!d.ok){err.textContent=d.error;err.style.display='block';flashBox('mBox','red','');return;}
+  flashBox('mBox','green','');
+  mTeam=d.team;mItems=d.items;mCart={};
+  document.getElementById('mTNm').textContent=d.team.name;
+  document.getElementById('mTMt').textContent=d.team.class+' кл.';
+  document.getElementById('mTBl').textContent=d.team.balance+' оч.';
+  document.getElementById('mTeamCard').classList.add('show');
+  document.getElementById('mItems').style.display='block';
+  renderMItems();renderMCart();
+}
+function renderMItems(){
+  document.getElementById('mGrid').innerHTML=mItems.map(function(it){
+    var inC=mCart[it.id]?mCart[it.id].qty:0,oos=it.stock===0;
+    return '<div class="ic'+(oos?' oos':'')+'">'
+      +'<div class="icd" id="mcd'+it.id+'" style="'+(inC?'display:flex':'')+'">'+( inC||'')+'</div>'
+      +'<div class="ie">'+emoji(it.name)+'</div>'
+      +'<div class="iname">'+it.name+'</div>'
+      +'<div class="iprice">'+it.price+' оч.</div>'
+      +'<div class="istock">Склад: '+it.stock+'</div>'
+      +(!oos?'<div class="qrow"><button class="qb" onclick="mQ('+it.id+',-1)">−</button><span class="qv" id="mqv'+it.id+'">'+inC+'</span><button class="qb" onclick="mQ('+it.id+',1)">+</button></div>':'<div style="font-size:11px;color:var(--rd);margin-top:5px">Нет в наличии</div>')
+      +'</div>';
+  }).join('');
+}
+function mQ(id,d){
+  var it=mItems.find(function(i){return i.id===id;});if(!it)return;
+  if(!mCart[id]) mCart[id]={...it,qty:0};
+  var nq=Math.max(0,Math.min(it.stock,mCart[id].qty+d));
+  mCart[id].qty=nq;if(nq===0)delete mCart[id];
+  renderMItems();renderMCart();
+}
+function renderMCart(){
+  var cl=document.getElementById('mCartDiv'),tr=document.getElementById('mTotRow'),btn=document.getElementById('mPayBtn');
+  var entries=Object.entries(mCart).filter(function(e){return e[1].qty>0;});
+  if(!entries.length){cl.innerHTML='<div class="cempty">Добавьте товары</div>';tr.style.display='none';btn.disabled=true;return;}
+  var total=0,html='';
+  entries.forEach(function(e){var v=e[1];var c=v.price*v.qty;total+=c;html+='<div class="ci"><span class="cin">'+v.name+'</span><span class="ciq">×'+v.qty+'</span><span class="cic">−'+c+'</span></div>';});
+  cl.innerHTML=html;
+  document.getElementById('mTotVal').textContent=total+' оч.';
+  tr.style.display='flex';
+  var ok=mTeam&&total<=mTeam.balance;
+  btn.disabled=!ok;btn.textContent=ok?'✓ ОФОРМИТЬ ПОКУПКУ':'⚠️ НЕДОСТАТОЧНО ОЧКОВ';
+}
+async function doManualPay(){
+  var cart=Object.entries(mCart).filter(function(e){return e[1].qty>0;}).map(function(e){return{item_id:parseInt(e[0]),quantity:e[1].qty};});
+  var r=await fetch('/api/shop/buy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({team_login:mTeam.name,cart:cart,payment_method:'Ручной'})});
+  var d=await r.json();
+  if(d.ok){
+    toast('✓ Покупка: −'+d.total+' оч. Баланс: '+d.new_balance,'ok');
+    mTeam.balance=d.new_balance;document.getElementById('mTBl').textContent=d.new_balance+' оч.';
+    mCart={};
+    var r2=await fetch('/api/shop/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({team_login:mTeam.name})});
+    var d2=await r2.json();if(d2.ok){mItems=d2.items;mTeam=d2.team;document.getElementById('mTBl').textContent=d2.team.balance+' оч.';renderMItems();}
+    renderMCart();loadOrders();loadRes();
+  }else toast('✗ '+d.error,'err');
+}
+
+/* ── ORDERS ── */
+async function loadOrders(){
+  var r=await fetch('/api/shop/orders');var d=await r.json();if(!d.ok)return;
+  document.getElementById('oc').textContent=d.orders.length;
+  var list=document.getElementById('OL');
+  if(!d.orders.length){list.innerHTML='<div class="noo"><div class="noi">📭</div><p>Нет новых заказов</p></div>';return;}
+  list.innerHTML=d.orders.map(function(o){
+    var isNfc=o.payment==='NFC';
+    return '<div class="ocard '+(isNfc?'nfc-ord':'new-ord')+'" id="ord'+o.id+'">'
+      +'<div class="otp"><span class="otm">👥 '+o.team+'</span><span class="oti">'+o.time+'</span></div>'
+      +'<div><span class="opy '+(isNfc?'nfc':'man')+'">'+(isNfc?'📡 NFC':'⌨️ Ручной')+'</span></div>'
+      +'<div class="odt"><span>'+o.item+'</span> × <span>'+o.qty+'</span> — <span style="color:var(--a2);font-weight:700">'+o.cost+' оч.</span></div>'
+      +'<button class="isb" onclick="issueOrder('+o.id+')">✓ ВЫДАТЬ ТОВАР</button>'
+      +'</div>';
+  }).join('');
+}
+async function issueOrder(id){
+  var r=await fetch('/api/shop/issue_order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({order_id:id})});
+  var d=await r.json();
+  if(d.ok){var c=document.getElementById('ord'+id);if(c){c.style.opacity='.4';c.querySelector('.isb').textContent='✓ Выдан';c.querySelector('.isb').disabled=true;}loadOrders();loadRes();}
+}
+
+/* ── RESERVATIONS ── */
+async function loadRes(){
+  var r=await fetch('/api/shop/reservations');var d=await r.json();if(!d.ok)return;
+  var list=document.getElementById('RL');
+  if(!d.reservations.length){list.innerHTML='<div class="noo"><div class="noi">📋</div><p>Нет броней</p></div>';return;}
+  // Group by team
+  var byTeam={};
+  d.reservations.forEach(function(r2){
+    if(!byTeam[r2.Team_Name])byTeam[r2.Team_Name]={items:[],total:0,expires:r2.Expires_At,ids:[]};
+    byTeam[r2.Team_Name].items.push(r2);byTeam[r2.Team_Name].total+=r2.Total_Cost;byTeam[r2.Team_Name].ids.push(r2.id);
+  });
+  list.innerHTML=Object.entries(byTeam).map(function(e){
+    var team=e[0],g=e[1];
+    var idsJson=JSON.stringify(g.ids).replace(/"/g,'&quot;');
+    return '<div class="rcard">'
+      +'<div class="rbot"><span class="rteam">📋 '+team+'</span><span class="rexp ok" data-exp="'+g.expires+'">--:--</span></div>'
+      +g.items.map(function(r2){return '<div class="ritems">'+r2.Item_Name+' × '+r2.Quantity+' — '+r2.Total_Cost+' оч.</div>';}).join('')
+      +'<div class="rbot" style="margin-top:6px"><span style="color:var(--mt);font-size:12px">Итого:</span><span class="rtot">'+g.total+' оч.</span></div>'
+      +'<button class="pay-res-btn" onclick="startResPay('+JSON.stringify(g.ids)+',\''+team.replace(/\'/g,"\\'")+'\')">'+'💳 Оплатить бронь NFC</button>'
+      +'</div>';
+  }).join('');
+  tickExp();
+}
+function tickExp(){
+  document.querySelectorAll('.rexp[data-exp]').forEach(function(el){
+    var left=new Date(el.dataset.exp.replace(' ','T'))-Date.now();
+    if(left<=0){el.textContent='Просрочена';el.className='rexp danger';return;}
+    var m=Math.floor(left/60000),s=Math.floor((left%60000)/1000);
+    el.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    el.className='rexp '+(left<60000?'danger':left<180000?'warn':'ok');
+  });
+}
+setInterval(tickExp,500);
+
+/* ── HELPERS ── */
+var EM={'палочки':'🪵','клей':'🔧','макароны':'🍝','скотч':'📎','нитки':'🧵'};
+function emoji(n){var l=n.toLowerCase();for(var k in EM)if(l.includes(k))return EM[k];return '📦';}
+function flashBox(id,add,restore){var e=document.getElementById(id);e.classList.add(add);if(restore)setTimeout(function(){e.classList.remove(add);e.classList.add(restore);},1200);else setTimeout(function(){e.className='sbox';},1200);}
+function toast(msg,type){var t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type||'ok')+' show';setTimeout(function(){t.classList.remove('show');},4000);}
+
+/* ── INIT ── */
+setMode('nfc');renderNfcCart();loadOrders();loadRes();
+var _shopMs=5000,_shopTmr=null;
+(async function(){
+  try{var r=await fetch('/api/settings/public');var d=await r.json();if(d.ok&&d.refresh_interval_s)_shopMs=Math.max(3,d.refresh_interval_s)*1000;}catch(e){}
+  scheduleShopRefresh();
+})();
+function scheduleShopRefresh(){
+  clearTimeout(_shopTmr);
+  _shopTmr=setTimeout(function(){loadOrders();loadRes();scheduleShopRefresh();},_shopMs);
+}
+</script>
+</body>
+</html>

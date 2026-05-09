@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Администратор — Инженерный Хакатон</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Exo+2:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080c14;--s1:#0f1623;--s2:#151e2d;--bd:#1c2f4a;--ac:#00d4ff;--a2:#ff6b35;--gr:#00e676;--yw:#ffd600;--pu:#b39ddb;--rd:#ff5252;--tx:#e2e8f0;--mt:#4a6080}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:'Exo 2',sans-serif;min-height:100vh;display:flex}
+.sidebar{width:220px;background:var(--s1);border-right:1px solid var(--bd);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:10}
+.slogo{padding:22px 18px;border-bottom:1px solid var(--bd)}
+.slogo h1{font-family:'Orbitron',sans-serif;font-size:13px;color:var(--ac);font-weight:900;line-height:1.4}
+.slogo p{color:var(--mt);font-size:11px;margin-top:3px}
+.snav{flex:1;padding:10px 0}
+.ni{display:flex;align-items:center;gap:10px;padding:11px 18px;cursor:pointer;transition:all .2s;color:var(--mt);font-size:13px;border-left:3px solid transparent;user-select:none}
+.ni:hover{background:rgba(255,255,255,.04);color:var(--tx)}
+.ni.on{background:rgba(0,212,255,.08);color:var(--ac);border-left-color:var(--ac)}
+.sfoot{padding:14px 18px;border-top:1px solid var(--bd)}
+.logout{display:block;text-align:center;padding:9px;background:rgba(255,107,53,.1);border:1px solid var(--a2);color:var(--a2);border-radius:8px;text-decoration:none;font-size:13px}
+.main{margin-left:220px;flex:1;padding:22px}
+.page{display:none}.page.on{display:block}
+.ptitle{font-family:'Orbitron',sans-serif;font-size:20px;font-weight:900;margin-bottom:22px;color:var(--ac)}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.sc{background:var(--s1);border:1px solid var(--bd);border-radius:11px;padding:18px;text-align:center}
+.sv{font-family:'Orbitron',sans-serif;font-size:30px;font-weight:900}
+.sl{color:var(--mt);font-size:11px;margin-top:5px;text-transform:uppercase}
+.panel{background:var(--s1);border:1px solid var(--bd);border-radius:11px;margin-bottom:22px;overflow:hidden}
+.ph{padding:14px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.02)}
+.ph h2{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+.pb{padding:18px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{padding:9px 11px;text-align:left;color:var(--mt);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:.4px;border-bottom:1px solid var(--bd);white-space:nowrap}
+td{padding:9px 11px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.btn{padding:7px 14px;border-radius:7px;font-family:'Exo 2',sans-serif;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+.btn-p{background:linear-gradient(135deg,var(--ac),#0099cc);color:#000}
+.btn-d{background:rgba(255,107,53,.15);color:var(--a2);border:1px solid var(--a2)}
+.btn-sm{padding:4px 11px;font-size:11px}
+.btn:hover{transform:translateY(-1px)}
+.frow{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:11px;margin-bottom:14px}
+.fg label{display:block;font-size:11px;color:var(--mt);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px}
+input,select,textarea{width:100%;padding:9px 12px;background:rgba(255,255,255,.04);border:1px solid var(--bd);border-radius:8px;color:var(--tx);font-family:'Exo 2',sans-serif;font-size:13px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--ac)}
+select option{background:var(--s2)}
+textarea{resize:vertical;line-height:1.5}
+.spl{padding:3px 9px;border-radius:9px;font-size:11px;white-space:nowrap;display:inline-block}
+.sp-ok{background:rgba(0,230,118,.1);color:var(--gr);border:1px solid rgba(0,230,118,.3)}
+.sp-no{background:rgba(74,96,128,.2);color:var(--mt);border:1px solid var(--bd)}
+.lb-row{display:grid;grid-template-columns:40px 1fr 80px 80px 80px 80px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.lb-row:last-child{border:none}
+.lb-r{font-family:'Orbitron',sans-serif;font-size:16px;text-align:center}
+.lb-n{font-weight:600;font-size:14px}
+.lb-c{color:var(--mt);font-size:12px}
+.lb-v{font-family:'Orbitron',sans-serif;font-size:13px;text-align:center}
+.rexp{font-family:monospace;font-size:11px;padding:2px 7px;border-radius:6px;font-weight:700}
+.rexp.ok{color:var(--gr);background:rgba(0,230,118,.1)}.rexp.warn{color:var(--yw);background:rgba(255,214,0,.1)}.rexp.danger{color:var(--rd);background:rgba(239,83,80,.12)}
+.imgwrap{display:flex;gap:6px;align-items:center}.imgwrap input{flex:1}
+.imgprev{width:44px;height:44px;border-radius:6px;object-fit:cover;border:1px solid var(--bd);display:none;flex-shrink:0}
+.uplbtn{padding:9px 12px;background:rgba(0,212,255,.1);border:1px solid var(--ac);color:var(--ac);border-radius:7px;cursor:pointer;font-size:12px;white-space:nowrap;flex-shrink:0}
+.modal{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.75);align-items:center;justify-content:center}
+.modal.open{display:flex}
+.mbox{background:#111c22;border:1px solid #1a3040;border-radius:13px;padding:26px;width:540px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.mtitle{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:var(--ac);margin-bottom:18px}
+.mlabel{display:block;font-size:11px;color:#546e7a;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px}
+.minput{width:100%;padding:9px 12px;background:rgba(255,255,255,.04);border:1px solid #1a3040;border-radius:7px;color:#e2e8f0;font-family:'Exo 2',sans-serif;font-size:13px;outline:none}
+.minput:focus{border-color:var(--ac)}
+.mgrid2{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:11px}
+.mgrid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-bottom:11px}
+.mfoot{display:flex;gap:10px;margin-top:16px}
+.msave{flex:1;padding:11px;background:linear-gradient(135deg,var(--ac),#0099cc);border:none;border-radius:8px;color:#000;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;cursor:pointer}
+.mcancel{padding:11px 18px;background:rgba(255,255,255,.06);border:1px solid #1a3040;border-radius:8px;color:#546e7a;cursor:pointer;font-size:13px}
+.mmsg{margin-top:9px;font-size:13px;display:none}
+.mhint{margin-top:8px;padding:9px 12px;background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.15);border-radius:7px;font-size:12px;color:var(--mt);line-height:1.5}
+.mimgwrap{display:flex;gap:6px;align-items:center;margin-bottom:11px}.mimgwrap input{flex:1}
+.mimgprev{width:44px;height:44px;border-radius:6px;object-fit:cover;border:1px solid #1a3040;display:none;flex-shrink:0}
+.muplbtn{padding:9px 12px;background:rgba(0,212,255,.1);border:1px solid var(--ac);color:var(--ac);border-radius:7px;cursor:pointer;font-size:12px;white-space:nowrap;flex-shrink:0}
+/* GAME */
+.game-timer-big{font-family:'Orbitron',sans-serif;font-size:60px;font-weight:900;letter-spacing:4px;line-height:1;transition:color .5s}
+.game-status-badge{display:inline-block;padding:6px 18px;border-radius:20px;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:20px}
+.gsb-idle{background:rgba(74,96,128,.2);color:var(--mt);border:1px solid var(--bd)}
+.gsb-running{background:rgba(0,230,118,.15);color:var(--gr);border:1px solid rgba(0,230,118,.4)}
+.gsb-finished{background:rgba(255,214,0,.15);color:var(--yw);border:1px solid rgba(255,214,0,.4)}
+.dur-btn{padding:9px 14px;border-radius:8px;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;cursor:pointer;border:1px solid rgba(0,212,255,.3);background:rgba(0,212,255,.07);color:var(--ac);transition:all .2s}
+.dur-btn:hover,.dur-btn.sel{background:rgba(0,212,255,.2);border-color:var(--ac)}
+.score-card{background:var(--s2);border:1px solid var(--bd);border-radius:11px;padding:16px}
+.toast{position:fixed;bottom:22px;right:22px;z-index:9999;background:var(--s1);border:1px solid var(--bd);border-radius:11px;padding:13px 22px;font-size:14px;box-shadow:0 8px 28px rgba(0,0,0,.5);transform:translateX(120%);transition:transform .3s cubic-bezier(.16,1,.3,1)}
+.toast.show{transform:translateX(0)}
+.toast.ok{border-color:var(--gr)}.toast.err{border-color:var(--a2)}
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.stats-row{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="slogo"><h1>ИНЖЕНЕРНЫЙ<br>ХАКАТОН</h1><p>Администратор</p></div>
+  <div class="snav">
+    <div class="ni on" onclick="showPage('lb',this)">🏆 Лидерборд</div>
+    <div class="ni" onclick="showPage('teams',this)">👥 Команды</div>
+    <div class="ni" onclick="showPage('shop',this)">🏪 Магазин</div>
+    <div class="ni" onclick="showPage('asg',this)">🎯 Задания</div>
+    <div class="ni" onclick="showPage('orders',this)">📦 Заказы</div>
+    <div class="ni" onclick="showPage('nfc',this)">📡 NFC Карты</div>
+    <div class="ni" onclick="showPage('game',this)">⏱ Игра</div>
+    <div class="ni" onclick="showPage('settings',this)">⚙️ Настройки</div>
+  </div>
+  <div class="sfoot"><a href="/logout" class="logout">Выйти</a></div>
+</nav>
+
+<div class="main">
+
+  <!-- LEADERBOARD -->
+  <div class="page on" id="page-lb">
+    <div class="ptitle">🏆 Лидерборд</div>
+    <div class="stats-row">
+      <div class="sc"><div class="sv" style="color:var(--ac)" id="gs-t">0</div><div class="sl">Команд</div></div>
+      <div class="sc"><div class="sv" style="color:var(--gr)" id="gs-s">0</div><div class="sl">Начали работу</div></div>
+      <div class="sc"><div class="sv" style="color:var(--yw)" id="gs-a">0</div><div class="sl">Заданий решено</div></div>
+      <div class="sc"><div class="sv" style="color:var(--a2)" id="gs-sp">0</div><div class="sl">Очков потрачено</div></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h2>Рейтинг команд</h2>
+        <div style="display:flex;gap:8px">
+          <select id="lbF" onchange="loadLB()" style="width:auto;padding:6px 11px">
+            <option value="">Все классы</option><option value="7-9">7–9 класс</option><option value="10-11">10–11 класс</option>
+          </select>
+          <button class="btn btn-p btn-sm" onclick="loadLB()">Обновить</button>
+        </div>
+      </div>
+      <div class="pb" id="lbBody">Загрузка...</div>
+    </div>
+  </div>
+
+  <!-- TEAMS -->
+  <div class="page" id="page-teams">
+    <div class="ptitle">👥 Команды</div>
+    <div class="panel">
+      <div class="ph"><h2>Добавить команду</h2></div>
+      <div class="pb">
+        <div class="frow">
+          <div class="fg"><label>Логин</label><input id="t-login" placeholder="Мостовики"></div>
+          <div class="fg"><label>Пароль</label><input id="t-pass" placeholder="••••••"></div>
+          <div class="fg"><label>Роль</label><select id="t-role"><option value="Участник">Участник</option><option value="Магазин">Магазин</option><option value="Администратор">Администратор</option></select></div>
+          <div class="fg"><label>Класс</label><select id="t-class"><option value="7-9">7–9</option><option value="10-11">10–11</option></select></div>
+          <div class="fg"><label>Бюджет</label><input id="t-budget" type="number" value="500"></div>
+        </div>
+        <button class="btn btn-p" onclick="addTeam()">Добавить</button>
+        <span id="tMsg" style="margin-left:10px;font-size:13px;display:none"></span>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h2>Список команд</h2></div>
+      <div class="pb" style="padding:0;overflow-x:auto">
+        <table><thead><tr><th>Команда</th><th>Роль</th><th>Класс</th><th>Баланс</th><th>Потрачено</th><th>Статус</th><th></th></tr></thead>
+          <tbody>
+            {% for t in teams %}
+            <tr id="tr-{{ t.id }}">
+              <td><strong>{{ t.Login }}</strong></td><td>{{ t.Role }}</td><td>{{ t.Class }}</td>
+              <td style="color:var(--ac);font-weight:700">{{ t.Current_Balance }}</td>
+              <td style="color:var(--a2)">{{ t.Spent }}</td>
+              <td>{% if t.Status=='Начали выполнение задания' %}<span class="spl sp-ok">Работают</span>{% else %}<span class="spl sp-no">Ждут</span>{% endif %}</td>
+              <td><button class="btn btn-d btn-sm" data-action="del-team" data-id="{{ t.id }}" data-name="{{ t.Login|e }}">Удалить</button></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHOP -->
+  <div class="page" id="page-shop">
+    <div class="ptitle">🏪 Товары магазина</div>
+    <div class="panel">
+      <div class="ph"><h2>➕ Добавить товар</h2></div>
+      <div class="pb">
+        <div class="frow">
+          <div class="fg" style="grid-column:span 2"><label>Название</label><input id="i-name" placeholder="Деревянные палочки"></div>
+          <div class="fg"><label>Цена (оч.)</label><input id="i-price" type="number" value="50" min="1"></div>
+          <div class="fg"><label>На складе</label><input id="i-stock" type="number" value="10" min="0"></div>
+          <div class="fg"><label>Вес (г)</label><input id="i-weight" type="number" step="0.1" value="0" min="0"></div>
+          <div class="fg"><label>Штрих-код</label><input id="i-barcode" placeholder="ITEM006" style="font-family:monospace"></div>
+          <div class="fg" style="grid-column:span 2">
+            <label>Картинка</label>
+            <div class="imgwrap">
+              <input id="i-image" placeholder="URL или загрузите →" oninput="prevImg(this.value,'i-prev')">
+              <img id="i-prev" class="imgprev">
+              <label class="uplbtn">📁<input type="file" accept="image/*" style="display:none" onchange="uploadImg(this,'i-image','i-prev')"></label>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-p" onclick="addItem()">➕ Добавить</button>
+        <span id="iMsg" style="margin-left:10px;font-size:13px;display:none"></span>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h2>📦 Склад</h2><span style="font-size:12px;color:var(--mt)">✏️ редактировать · ✕ удалить</span></div>
+      <div class="pb" style="padding:0;overflow-x:auto">
+        <table><thead><tr><th>Товар</th><th>Цена</th><th>Склад</th><th>Вес</th><th>Штрих-код</th><th>Доступно</th><th></th></tr></thead>
+          <tbody>
+            {% for it in items %}
+            <tr id="ir-{{ it.id }}">
+              <td>{% if it.Image %}<img src="{{ it.Image }}" style="width:28px;height:28px;border-radius:5px;object-fit:cover;vertical-align:middle;margin-right:7px" onerror="this.style.display='none'">{% endif %}<strong>{{ it.Item_Name }}</strong></td>
+              <td style="color:var(--ac)">{{ it.Price }}</td><td>{{ it.Stock }}</td>
+              <td style="color:var(--mt)">{{ it.Item_Weight }}</td>
+              <td style="font-family:monospace;font-size:12px;color:var(--mt)">{{ it.Barcode or '—' }}</td>
+              <td style="color:{% if it.available==0 %}var(--rd){% elif it.available<=3 %}var(--yw){% else %}var(--gr){% endif %}">{{ it.available }}</td>
+              <td style="white-space:nowrap">
+                <button class="btn btn-p btn-sm" data-action="edit-item" data-id="{{ it.id }}" data-name="{{ it.Item_Name|e }}" data-price="{{ it.Price }}" data-stock="{{ it.Stock }}" data-weight="{{ it.Item_Weight }}" data-barcode="{{ it.Barcode|e }}" data-image="{{ it.Image|e }}">✏️</button>
+                <button class="btn btn-d btn-sm" data-action="del-item" data-id="{{ it.id }}" data-name="{{ it.Item_Name|e }}">✕</button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ASSIGNMENTS -->
+  <div class="page" id="page-asg">
+    <div class="ptitle">🎯 Задания</div>
+    <div class="panel">
+      <div class="ph"><h2>Добавить задание</h2></div>
+      <div class="pb">
+        <div class="frow">
+          <div class="fg"><label>Класс</label><select id="a-class"><option value="7-9">7–9</option><option value="10-11">10–11</option></select></div>
+          <div class="fg"><label>Предмет</label><select id="a-subject"><option>Физика</option><option>Математика</option><option>Информатика</option></select></div>
+          <div class="fg"><label>Ответ</label><input id="a-answer" placeholder="Правильный ответ"></div>
+          <div class="fg"><label>Очки</label><input id="a-price" type="number" value="30"></div>
+          <div class="fg" style="grid-column:span 2"><label>Текст вопроса</label><input id="a-question" placeholder="Что спросить?"></div>
+          <div class="fg" style="grid-column:span 2">
+            <label>Картинка</label>
+            <div class="imgwrap">
+              <input id="a-image" placeholder="URL или загрузите →" oninput="prevImg(this.value,'a-prev')">
+              <img id="a-prev" class="imgprev">
+              <label class="uplbtn">📁<input type="file" accept="image/*" style="display:none" onchange="uploadImg(this,'a-image','a-prev')"></label>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-p" onclick="addAsg()">Добавить задание</button>
+        <span id="aMsg" style="margin-left:10px;font-size:13px;display:none"></span>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h2>Все задания</h2></div>
+      <div class="pb" style="padding:0;overflow-x:auto">
+        <table><thead><tr><th></th><th>Класс</th><th>Предмет</th><th>Вопрос</th><th>Ответ</th><th>Очки</th><th></th></tr></thead>
+          <tbody>
+            {% for a in assignments %}
+            <tr id="ar-{{ a.id }}">
+              <td>{% if a.Image %}<img src="{{ a.Image }}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;vertical-align:middle" onerror="this.style.display='none'">{% else %}<span style="font-size:20px;opacity:.3">🖼️</span>{% endif %}</td>
+              <td>{{ a.Class }}</td>
+              <td><span class="spl" style="background:rgba(0,212,255,.1);color:var(--ac);border:1px solid rgba(0,212,255,.3)">{{ a.Subject }}</span></td>
+              <td style="font-size:12px;max-width:240px;color:var(--mt)">{{ (a.Question or '—')[:65] }}{% if a.Question and a.Question|length > 65 %}…{% endif %}</td>
+              <td style="color:var(--gr)">{{ a.Answer }}</td>
+              <td style="color:var(--yw)">+{{ a.Price }}</td>
+              <td style="white-space:nowrap">
+                <button class="btn btn-p btn-sm" data-action="edit-asg" data-id="{{ a.id }}" data-class="{{ a.Class|e }}" data-subject="{{ a.Subject|e }}" data-question="{{ (a.Question or '')|e }}" data-answer="{{ a.Answer|e }}" data-price="{{ a.Price }}" data-image="{{ (a.Image or '')|e }}">✏️</button>
+                <button class="btn btn-d btn-sm" data-action="del-asg" data-id="{{ a.id }}">Удалить</button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ORDERS -->
+  <div class="page" id="page-orders">
+    <div class="ptitle">📦 История заказов</div>
+    <div class="panel">
+      <div class="ph"><h2>Все заказы</h2><button class="btn btn-p btn-sm" onclick="location.reload()">Обновить</button></div>
+      <div class="pb" style="padding:0;overflow-x:auto">
+        <table><thead><tr><th>Команда</th><th>Товар</th><th>Кол.</th><th>Стоим.</th><th>Время</th><th>Оплата</th><th>Статус</th></tr></thead>
+          <tbody>
+            {% for o in orders %}
+            <tr>
+              <td><strong>{{ o.Team_Name }}</strong></td><td>{{ o.Item }}</td><td>{{ o.Quantity }}</td>
+              <td style="color:var(--a2)">{{ o.Cost }}</td>
+              <td style="color:var(--mt)">{{ o.Time[:16] if o.Time else '—' }}</td>
+              <td style="font-size:12px">{% if o.Payment_Method=='NFC' %}<span style="color:var(--pu)">📡 NFC</span>{% else %}<span style="color:var(--ac)">⌨️ Ручной</span>{% endif %}</td>
+              <td>{% if o.Status=='Выдан' %}<span class="spl sp-ok">✓ Выдан</span>{% else %}<span class="spl sp-no">⏳ Новый</span>{% endif %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- NFC -->
+  <div class="page" id="page-nfc">
+    <div class="ptitle">📡 NFC Карты</div>
+    <div class="panel" style="margin-bottom:20px">
+      <div class="ph"><h2>🔗 Привязать карту</h2></div>
+      <div class="pb">
+        <p style="color:var(--mt);font-size:13px;margin-bottom:14px">Запустите <code style="color:var(--ac)">nfc_bridge.py</code>, поднесите карту, нажмите «Получить UID», выберите команду → «Привязать».</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+          <div>
+            <label style="display:block;font-size:11px;color:var(--mt);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">UID карты</label>
+            <div style="display:flex;gap:7px">
+              <input id="nfc-uid" placeholder="Поднесите карту..." style="font-family:monospace">
+              <button class="btn btn-p btn-sm" onclick="pollUID()" style="white-space:nowrap">📡 Получить UID</button>
+            </div>
+            <div id="nfc-hint" style="font-size:11px;color:var(--mt);margin-top:4px"></div>
+          </div>
+          <div>
+            <label style="display:block;font-size:11px;color:var(--mt);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Команда</label>
+            <select id="nfc-team">
+              <option value="">— выберите —</option>
+              {% for t in teams %}<option value="{{ t.Login|e }}">{{ t.Login }} ({{ t.Class }} кл.)</option>{% endfor %}
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-p" onclick="regNfc()">🔗 Привязать</button>
+        <span id="nfc-res" style="margin-left:10px;font-size:13px"></span>
+      </div>
+    </div>
+    <div class="panel" style="margin-bottom:20px">
+      <div class="ph"><h2>Привязанные карты</h2><button class="btn btn-p btn-sm" onclick="loadNfcCards()">Обновить</button></div>
+      <div class="pb" style="padding:0;overflow-x:auto">
+        <table><thead><tr><th>UID</th><th>Команда</th><th>Дата привязки</th><th></th></tr></thead>
+          <tbody id="nfcTbl">
+            {% for c in nfc_cards %}
+            <tr id="nc-{{ c.id }}">
+              <td><code style="color:var(--ac);letter-spacing:1px">{{ c.UID }}</code></td>
+              <td><strong>{{ c.Team_Login }}</strong></td>
+              <td style="color:var(--mt)">{{ c.Registered_At }}</td>
+              <td><button class="btn btn-d btn-sm" data-action="del-nfc" data-id="{{ c.id }}">Удалить</button></td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4" style="text-align:center;color:var(--mt);padding:20px">Карты не привязаны</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h2>📋 Активные брони</h2><button class="btn btn-p btn-sm" onclick="loadAdminRes()">Обновить</button></div>
+      <div class="pb" style="padding:0;overflow-x:auto">
+        <table><thead><tr><th>Команда</th><th>Товар</th><th>Кол.</th><th>Стоим.</th><th>Истекает</th><th>Осталось</th><th></th></tr></thead>
+          <tbody id="resTbl">
+            {% for r in reservations %}
+            <tr id="res-{{ r.id }}">
+              <td><strong>{{ r.Team_Name }}</strong></td><td>{{ r.Item_Name }}</td><td>{{ r.Quantity }}</td>
+              <td style="color:var(--a2)">{{ r.Total_Cost }}</td>
+              <td style="color:var(--mt);font-size:12px">{{ r.Expires_At[11:16] if r.Expires_At else '—' }}</td>
+              <td><span class="rexp ok" data-exp="{{ r.Expires_At }}">—</span></td>
+              <td><button class="btn btn-d btn-sm" data-action="del-res" data-id="{{ r.id }}">Отменить</button></td>
+            </tr>
+            {% else %}
+            <tr><td colspan="7" style="text-align:center;color:var(--mt);padding:20px">Нет активных броней</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME -->
+  <div class="page" id="page-game">
+    <div class="ptitle">⏱ Управление игрой</div>
+    <div class="panel" style="margin-bottom:22px">
+      <div class="ph">
+        <h2>🎮 Таймер игры</h2>
+        <span id="gStatusBadge" class="game-status-badge gsb-idle">⚪ Ожидание</span>
+      </div>
+      <div class="pb" style="text-align:center;padding:30px 20px">
+        <div class="game-timer-big" id="gTimerBig" style="color:var(--mt)">--:--:--</div>
+        <div style="height:8px;background:rgba(255,255,255,.07);border-radius:4px;margin:20px auto;max-width:400px;overflow:hidden">
+          <div id="gTimerFill" style="height:100%;background:linear-gradient(90deg,var(--ac),var(--gr));border-radius:4px;width:100%;transition:width 1s linear"></div>
+        </div>
+        <div id="gInfo" style="color:var(--mt);font-size:13px;min-height:20px;margin-bottom:24px"></div>
+
+        <!-- IDLE: show start controls -->
+        <div id="gIdlePanel" style="max-width:480px;margin:0 auto">
+          <div style="font-size:13px;color:var(--mt);margin-bottom:12px">Выберите продолжительность:</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px">
+            <button class="dur-btn" data-secs="1800" onclick="setDur(1800)">30 мин</button>
+            <button class="dur-btn" data-secs="3600" onclick="setDur(3600)">1 час</button>
+            <button class="dur-btn" data-secs="5400" onclick="setDur(5400)">1.5 ч</button>
+            <button class="dur-btn" data-secs="7200" onclick="setDur(7200)">2 часа</button>
+            <button class="dur-btn" data-secs="10800" onclick="setDur(10800)">3 часа</button>
+            <button class="dur-btn" data-secs="14400" onclick="setDur(14400)">4 часа</button>
+            <button class="dur-btn" data-secs="21600" onclick="setDur(21600)">6 часов</button>
+            <button class="dur-btn" data-secs="28800" onclick="setDur(28800)">8 часов</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:20px">
+            <input id="durH" type="number" min="0" max="48" value="1" style="width:80px;font-family:'Orbitron',sans-serif;font-weight:700;font-size:18px;text-align:center">
+            <span style="color:var(--mt);font-size:20px">ч</span>
+            <input id="durM" type="number" min="0" max="59" value="0" style="width:80px;font-family:'Orbitron',sans-serif;font-weight:700;font-size:18px;text-align:center">
+            <span style="color:var(--mt);font-size:20px">мин</span>
+          </div>
+          <button onclick="startGame()" style="width:100%;max-width:300px;padding:16px;background:linear-gradient(135deg,var(--gr),#00a050);border:none;border-radius:11px;color:#000;font-family:'Orbitron',sans-serif;font-size:14px;font-weight:900;cursor:pointer;letter-spacing:1px">▶ НАЧАТЬ ИГРУ</button>
+        </div>
+
+        <!-- RUNNING: show stop button -->
+        <div id="gRunPanel" style="display:none;max-width:400px;margin:0 auto">
+          <button onclick="stopGame()" style="width:100%;padding:14px;background:rgba(255,82,82,.15);border:2px solid var(--rd);border-radius:11px;color:var(--rd);font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;cursor:pointer">⏹ ОСТАНОВИТЬ ДОСРОЧНО</button>
+        </div>
+
+        <!-- FINISHED: show reset button -->
+        <div id="gFinPanel" style="display:none;max-width:400px;margin:0 auto">
+          <div style="font-family:'Orbitron',sans-serif;font-size:16px;color:var(--yw);margin-bottom:16px">🏆 ИГРА ЗАВЕРШЕНА</div>
+          <div style="color:var(--mt);font-size:13px;margin-bottom:20px">Оцените постройки команд в разделе ниже.</div>
+          <button onclick="resetGame()" style="padding:12px 28px;background:rgba(0,212,255,.1);border:1px solid var(--ac);border-radius:9px;color:var(--ac);font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;cursor:pointer">🔄 СБРОСИТЬ — НАЧАТЬ НОВУЮ ИГРУ</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BUILD SCORING -->
+    <div class="panel">
+      <div class="ph"><h2>🏗️ Оценка построек</h2><button class="btn btn-p btn-sm" onclick="loadLB()">Обновить баланс</button></div>
+      <div class="pb">
+        <p style="color:var(--mt);font-size:13px;margin-bottom:18px">Начислите баллы командам за постройку моста. Нажмите быструю кнопку или введите своё значение.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
+          {% for t in teams %}
+          <div class="score-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+              <div>
+                <div style="font-weight:700;font-size:15px">{{ t.Login }}</div>
+                <div style="color:var(--mt);font-size:12px;margin-top:2px">{{ t.Class }} кл. · Баланс: <strong style="color:var(--ac)" id="sbal-{{ t.id }}">{{ t.Current_Balance }}</strong> оч.</div>
+              </div>
+              <div style="font-size:24px">🏗️</div>
+            </div>
+            <div style="display:flex;gap:6px;margin-bottom:10px">
+              <button class="btn btn-sm" onclick="quickScore({{ t.id }}, '{{ t.Login|e }}', 25)" style="flex:1;background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.3);color:var(--gr)">+25</button>
+              <button class="btn btn-sm" onclick="quickScore({{ t.id }}, '{{ t.Login|e }}', 50)" style="flex:1;background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.3);color:var(--gr)">+50</button>
+              <button class="btn btn-sm" onclick="quickScore({{ t.id }}, '{{ t.Login|e }}', 75)" style="flex:1;background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.3);color:var(--gr)">+75</button>
+              <button class="btn btn-sm" onclick="quickScore({{ t.id }}, '{{ t.Login|e }}', 100)" style="flex:1;background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.3);color:var(--gr)">+100</button>
+            </div>
+            <div style="display:flex;gap:8px">
+              <input type="number" min="1" max="9999" value="100" id="sinp-{{ t.id }}"
+                style="flex:1;font-family:'Orbitron',sans-serif;font-weight:700;font-size:16px;text-align:center">
+              <button class="btn btn-p" onclick="scoreTeam({{ t.id }}, '{{ t.Login|e }}')">✓ Начислить</button>
+            </div>
+            <div id="smsg-{{ t.id }}" style="margin-top:8px;font-size:12px;display:none"></div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="page" id="page-settings">
+    <div class="ptitle">⚙️ Настройки</div>
+    <div class="panel" style="margin-bottom:20px">
+      <div class="ph"><h2>🔄 Автообновление</h2></div>
+      <div class="pb">
+        <p style="color:var(--mt);font-size:13px;margin-bottom:14px">Как часто обновляются данные на экранах команд и в панели администратора.</p>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <div><label style="display:block;font-size:11px;color:var(--mt);text-transform:uppercase;margin-bottom:5px">Секунды</label>
+            <input id="refreshInput" type="number" min="3" max="120" value="10" style="width:90px;font-family:'Orbitron',sans-serif;font-size:18px;font-weight:700;text-align:center"></div>
+          <div style="display:flex;gap:7px;margin-top:18px">
+            <button class="btn btn-sm" style="background:rgba(0,212,255,.08);border:1px solid var(--ac);color:var(--ac)" onclick="document.getElementById('refreshInput').value=5">5с</button>
+            <button class="btn btn-sm" style="background:rgba(0,212,255,.08);border:1px solid var(--ac);color:var(--ac)" onclick="document.getElementById('refreshInput').value=10">10с</button>
+            <button class="btn btn-sm" style="background:rgba(0,212,255,.08);border:1px solid var(--ac);color:var(--ac)" onclick="document.getElementById('refreshInput').value=30">30с</button>
+            <button class="btn btn-sm" style="background:rgba(0,212,255,.08);border:1px solid var(--ac);color:var(--ac)" onclick="document.getElementById('refreshInput').value=60">60с</button>
+          </div>
+          <button class="btn btn-p" onclick="saveRefresh()" style="margin-top:18px">💾 Сохранить</button>
+        </div>
+        <div id="refreshMsg" style="margin-top:10px;font-size:13px;display:none"></div>
+      </div>
+    </div>
+    <div class="panel" style="margin-bottom:20px">
+      <div class="ph"><h2>⏱ Время жизни брони</h2></div>
+      <div class="pb">
+        <p style="color:var(--mt);font-size:13px;margin-bottom:14px">Через сколько минут бронь автоматически отменяется.</p>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <div><label style="display:block;font-size:11px;color:var(--mt);text-transform:uppercase;margin-bottom:5px">Минуты</label>
+            <input id="ttl" type="number" min="1" max="120" value="5" style="width:90px;font-family:'Orbitron',sans-serif;font-size:18px;font-weight:700;text-align:center"></div>
+          <div style="display:flex;gap:7px;margin-top:18px">
+            {% for v in [5,10,15,30] %}
+            <button class="btn btn-sm" style="background:rgba(255,214,0,.08);border:1px solid var(--yw);color:var(--yw)" onclick="document.getElementById('ttl').value={{ v }}">{{ v }} мин</button>
+            {% endfor %}
+          </div>
+          <button class="btn btn-p" onclick="saveTtl()" style="margin-top:18px">💾 Сохранить</button>
+        </div>
+        <div id="ttlMsg" style="margin-top:10px;font-size:13px;display:none"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h2>⚠️ Сброс данных</h2></div>
+      <div class="pb">
+        <p style="color:var(--mt);margin-bottom:14px">Сбрасывает покупки, заказы и прогресс команд. Команды и товары сохраняются.</p>
+        <button class="btn btn-d" onclick="document.getElementById('rconf').style.display='block'">⚠️ Сбросить всё (без сброса игры)</button>
+        <div id="rconf" style="display:none;margin-top:14px;padding:14px;background:rgba(255,107,53,.08);border:1px solid var(--a2);border-radius:9px">
+          <p style="color:var(--a2);margin-bottom:11px">Вы уверены? Необратимо!</p>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-d" onclick="doReset()">Да, сбросить</button>
+            <button class="btn" style="background:rgba(255,255,255,.06);color:var(--mt);border:1px solid var(--bd)" onclick="document.getElementById('rconf').style.display='none'">Отмена</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- MODALS -->
+<div id="itemModal" class="modal">
+  <div class="mbox">
+    <div class="mtitle">✏️ Редактировать товар</div>
+    <input type="hidden" id="ei-id">
+    <div class="mgrid2"><div><label class="mlabel">Название</label><input class="minput" id="ei-name"></div><div><label class="mlabel">Цена</label><input class="minput" id="ei-price" type="number" min="1"></div></div>
+    <div class="mgrid3"><div><label class="mlabel">На складе</label><input class="minput" id="ei-stock" type="number" min="0"></div><div><label class="mlabel">Вес (г)</label><input class="minput" id="ei-weight" type="number" step="0.1" min="0"></div><div><label class="mlabel">Штрих-код</label><input class="minput" id="ei-barcode" style="font-family:monospace"></div></div>
+    <div><label class="mlabel">Картинка</label>
+      <div class="mimgwrap"><input class="minput" id="ei-image" placeholder="URL или загрузите →" oninput="prevImg(this.value,'ei-prev')"><img id="ei-prev" class="mimgprev"><label class="muplbtn">📁<input type="file" accept="image/*" style="display:none" onchange="uploadImg(this,'ei-image','ei-prev')"></label></div>
+    </div>
+    <div class="mhint">💡 <strong style="color:var(--ac)">Вес</strong> суммируется в вес моста. <strong style="color:var(--ac)">Штрих-код</strong> сканирует кладовщик.</div>
+    <div class="mfoot"><button class="msave" onclick="saveItem()">💾 СОХРАНИТЬ</button><button class="mcancel" onclick="closeModal('itemModal')">Отмена</button></div>
+    <div class="mmsg" id="ei-msg"></div>
+  </div>
+</div>
+
+<div id="asgModal" class="modal">
+  <div class="mbox">
+    <div class="mtitle">✏️ Редактировать задание</div>
+    <input type="hidden" id="ea-id">
+    <div class="mgrid2"><div><label class="mlabel">Класс</label><select class="minput" id="ea-class"><option value="7-9">7-9</option><option value="10-11">10-11</option></select></div><div><label class="mlabel">Предмет</label><select class="minput" id="ea-subject"><option>Физика</option><option>Математика</option><option>Информатика</option></select></div></div>
+    <div style="margin-bottom:11px"><label class="mlabel">Текст вопроса</label><textarea class="minput" id="ea-question" rows="3"></textarea></div>
+    <div class="mgrid2"><div><label class="mlabel">Ответ</label><input class="minput" id="ea-answer"></div><div><label class="mlabel">Очки</label><input class="minput" id="ea-price" type="number" min="1" style="font-family:'Orbitron',sans-serif;font-weight:700;text-align:center"></div></div>
+    <div style="margin-bottom:11px"><label class="mlabel">Картинка к заданию</label>
+      <div class="mimgwrap">
+        <input class="minput" id="ea-image" placeholder="URL или загрузите файл →" oninput="prevImg(this.value,'ea-prev')">
+        <img id="ea-prev" class="mimgprev">
+        <label class="muplbtn">📁<input type="file" accept="image/*" style="display:none" onchange="uploadImg(this,'ea-image','ea-prev')"></label>
+      </div>
+    </div>
+    <div class="mfoot"><button class="msave" onclick="saveAsg()">💾 СОХРАНИТЬ</button><button class="mcancel" onclick="closeModal('asgModal')">Отмена</button></div>
+    <div class="mmsg" id="ea-msg"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── NAVIGATION ──
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('on'); });
+  document.querySelectorAll('.ni').forEach(function(n){ n.classList.remove('on'); });
+  document.getElementById('page-'+name).classList.add('on');
+  if (el) el.classList.add('on');
+  if (name==='lb')       loadLB();
+  if (name==='settings') loadSettings();
+  if (name==='game')     refreshGame();
+  if (name==='nfc')      { loadAdminRes(); loadNfcCards(); }
+}
+
+// ── EVENT DELEGATION (data-action buttons) ──
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  var act = btn.dataset.action, id = btn.dataset.id;
+  if (act==='edit-item')  openItemModal(id, btn.dataset.name, btn.dataset.price, btn.dataset.stock, btn.dataset.weight, btn.dataset.barcode, btn.dataset.image);
+  else if (act==='del-item')  delItem(id, btn.dataset.name);
+  else if (act==='edit-asg')  openAsgModal(id, btn.dataset.class, btn.dataset.subject, btn.dataset.question, btn.dataset.answer, btn.dataset.price, btn.dataset.image);
+  else if (act==='del-asg')   delAsg(id);
+  else if (act==='del-team')  delTeam(id, btn.dataset.name);
+  else if (act==='del-nfc')   delNfc(id);
+  else if (act==='del-res')   delRes(id);
+});
+
+// ── TOAST ──
+function toast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast '+(type||'ok')+' show';
+  setTimeout(function(){ t.classList.remove('show'); }, 3500);
+}
+
+// ── MODAL ──
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+['itemModal','asgModal'].forEach(function(id) {
+  document.getElementById(id).addEventListener('click', function(e){ if(e.target===this) closeModal(id); });
+});
+
+// ── LEADERBOARD ──
+async function loadLB() {
+  try {
+    var r = await fetch('/api/admin/leaderboard');
+    var data = await r.json();
+    if (!data.ok) return;
+    var f = document.getElementById('lbF').value;
+    var ts = f ? data.teams.filter(function(t){ return t.class===f; }) : data.teams;
+    document.getElementById('gs-t').textContent  = ts.length;
+    document.getElementById('gs-s').textContent  = ts.filter(function(t){ return t.status!=='Не приступили к заданию'; }).length;
+    document.getElementById('gs-a').textContent  = ts.reduce(function(s,t){ return s+t.assignments; }, 0);
+    document.getElementById('gs-sp').textContent = ts.reduce(function(s,t){ return s+t.spent; }, 0);
+    var icons = ['🥇','🥈','🥉'];
+    document.getElementById('lbBody').innerHTML =
+      '<div class="lb-row" style="padding:6px 0"><span></span><span style="color:var(--mt);font-size:11px;text-transform:uppercase">Команда</span>'
+      +'<span class="lb-v" style="color:var(--mt);font-size:11px">Баланс</span>'
+      +'<span class="lb-v" style="color:var(--mt);font-size:11px">Потрачено</span>'
+      +'<span class="lb-v" style="color:var(--mt);font-size:11px">Вес</span>'
+      +'<span class="lb-v" style="color:var(--mt);font-size:11px">Задания</span></div>'
+      + ts.map(function(t,i){
+        return '<div class="lb-row"><span class="lb-r">'+(icons[i]||(i+1))+'</span>'
+          +'<div><div class="lb-n">'+t.name+'</div><div class="lb-c">'+t.class+' кл.</div></div>'
+          +'<div class="lb-v" style="color:var(--ac)">'+t.balance+'</div>'
+          +'<div class="lb-v" style="color:var(--a2)">'+t.spent+'</div>'
+          +'<div class="lb-v" style="color:var(--yw)">'+t.weight.toFixed(1)+'г</div>'
+          +'<div class="lb-v" style="color:var(--gr)">'+t.assignments+'</div></div>';
+      }).join('');
+    // Update score card balances on game page
+    data.teams.forEach(function(tt) {
+      var el = document.getElementById('sbal-'+tt.id);
+      if (el) el.textContent = tt.balance;
+    });
+  } catch(e) {}
+}
+
+// ── TEAMS ──
+async function addTeam() {
+  var msg = document.getElementById('tMsg');
+  var login = document.getElementById('t-login').value.trim();
+  if (!login) { msg.textContent='⚠️ Введите логин'; msg.style.color='var(--a2)'; msg.style.display='inline'; return; }
+  var r = await fetch('/api/admin/add_team', {method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({login:login,password:document.getElementById('t-pass').value,role:document.getElementById('t-role').value,class:document.getElementById('t-class').value,budget:document.getElementById('t-budget').value})});
+  var d = await r.json();
+  if (d.ok) { toast('✓ Команда добавлена','ok'); setTimeout(function(){location.reload();},600); }
+  else { msg.textContent='✗ Ошибка'; msg.style.color='var(--a2)'; msg.style.display='inline'; }
+}
+async function delTeam(id, name) {
+  if (!confirm('Удалить команду «'+name+'»?')) return;
+  await fetch('/api/admin/delete_team/'+id, {method:'DELETE'});
+  var row = document.getElementById('tr-'+id); if (row) row.remove();
+  toast('Команда удалена','ok');
+}
+
+// ── ITEMS ──
+async function addItem() {
+  var name = document.getElementById('i-name').value.trim(), msg = document.getElementById('iMsg');
+  if (!name) { msg.textContent='⚠️ Введите название'; msg.style.color='var(--a2)'; msg.style.display='inline'; return; }
+  var r = await fetch('/api/admin/add_item', {method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({name:name,price:document.getElementById('i-price').value,stock:document.getElementById('i-stock').value,weight:document.getElementById('i-weight').value,barcode:document.getElementById('i-barcode').value,image:document.getElementById('i-image').value.trim()})});
+  var d = await r.json();
+  if (d.ok) { toast('✓ Товар добавлен','ok'); setTimeout(function(){location.reload();},600); }
+  else { msg.textContent='✗ Ошибка'; msg.style.color='var(--a2)'; msg.style.display='inline'; }
+}
+function openItemModal(id,name,price,stock,weight,barcode,image){
+  document.getElementById('ei-id').value=id; document.getElementById('ei-name').value=name;
+  document.getElementById('ei-price').value=price; document.getElementById('ei-stock').value=stock;
+  document.getElementById('ei-weight').value=weight; document.getElementById('ei-barcode').value=barcode||'';
+  document.getElementById('ei-image').value=image||''; document.getElementById('ei-msg').style.display='none';
+  prevImg(image||'','ei-prev'); openModal('itemModal');
+}
+async function saveItem(){
+  var id=document.getElementById('ei-id').value, name=document.getElementById('ei-name').value.trim();
+  var price=parseInt(document.getElementById('ei-price').value), msg=document.getElementById('ei-msg');
+  if(!name){msg.textContent='⚠️ Введите название';msg.style.color='var(--a2)';msg.style.display='block';return;}
+  if(!price||price<1){msg.textContent='⚠️ Укажите цену';msg.style.color='var(--a2)';msg.style.display='block';return;}
+  var r=await fetch('/api/admin/update_item/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({name:name,price:price,stock:parseInt(document.getElementById('ei-stock').value),weight:parseFloat(document.getElementById('ei-weight').value),barcode:document.getElementById('ei-barcode').value.trim(),image:document.getElementById('ei-image').value.trim()})});
+  var d=await r.json();
+  if(d.ok){toast('✓ Сохранено','ok');closeModal('itemModal');setTimeout(function(){location.reload();},400);}
+  else{msg.textContent='✗ Ошибка';msg.style.color='var(--a2)';msg.style.display='block';}
+}
+async function delItem(id,name){
+  if(!confirm('Удалить «'+name+'»?'))return;
+  var r=await fetch('/api/admin/delete_item/'+id,{method:'DELETE'});
+  var d=await r.json();
+  if(d.ok){var row=document.getElementById('ir-'+id);if(row)row.remove();toast('Товар удалён','ok');}
+  else toast('Ошибка удаления','err');
+}
+
+// ── ASSIGNMENTS ──
+async function addAsg(){
+  var ans=document.getElementById('a-answer').value.trim(),msg=document.getElementById('aMsg');
+  if(!ans){msg.textContent='⚠️ Введите ответ';msg.style.color='var(--a2)';msg.style.display='inline';return;}
+  var r=await fetch('/api/admin/add_assignment',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({class:document.getElementById('a-class').value,subject:document.getElementById('a-subject').value,question:document.getElementById('a-question').value,answer:ans,price:document.getElementById('a-price').value,image:document.getElementById('a-image').value})});
+  var d=await r.json();
+  if(d.ok){toast('✓ Задание добавлено','ok');setTimeout(function(){location.reload();},600);}
+  else{msg.textContent='✗ Ошибка';msg.style.color='var(--a2)';msg.style.display='inline';}
+}
+function openAsgModal(id,cls,subj,question,answer,price,image){
+  document.getElementById('ea-id').value=id; document.getElementById('ea-class').value=cls;
+  document.getElementById('ea-subject').value=subj; document.getElementById('ea-question').value=question||'';
+  document.getElementById('ea-answer').value=answer; document.getElementById('ea-price').value=price;
+  var img=image||'';
+  document.getElementById('ea-image').value=img;
+  document.getElementById('ea-msg').style.display='none';
+  prevImg(img,'ea-prev');
+  openModal('asgModal');
+}
+async function saveAsg(){
+  var id=document.getElementById('ea-id').value,ans=document.getElementById('ea-answer').value.trim();
+  var price=parseInt(document.getElementById('ea-price').value),msg=document.getElementById('ea-msg');
+  if(!ans){msg.textContent='⚠️ Ответ пустой';msg.style.color='var(--a2)';msg.style.display='block';return;}
+  if(!price||price<1){msg.textContent='⚠️ Укажите очки';msg.style.color='var(--a2)';msg.style.display='block';return;}
+  var r=await fetch('/api/admin/update_assignment/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({class:document.getElementById('ea-class').value,subject:document.getElementById('ea-subject').value,question:document.getElementById('ea-question').value,answer:ans,price:price,image:document.getElementById('ea-image').value.trim()})});
+  var d=await r.json();
+  if(d.ok){toast('✓ Сохранено','ok');closeModal('asgModal');setTimeout(function(){location.reload();},400);}
+  else{msg.textContent='✗ Ошибка';msg.style.color='var(--a2)';msg.style.display='block';}
+}
+async function delAsg(id){
+  if(!confirm('Удалить задание?'))return;
+  await fetch('/api/admin/delete_assignment/'+id,{method:'DELETE'});
+  var row=document.getElementById('ar-'+id);if(row)row.remove();
+  toast('Задание удалено','ok');
+}
+
+// ── NFC ──
+async function pollUID(){
+  var hint=document.getElementById('nfc-hint');hint.textContent='⏳ Опрашиваем...';
+  var r=await fetch('/api/nfc/poll?since=0');var d=await r.json();
+  if(d.ok&&d.uid){document.getElementById('nfc-uid').value=d.uid;hint.textContent='✓ UID: '+d.uid+(d.team?' → '+d.team.name:' (не привязан)');hint.style.color='var(--gr)';}
+  else{hint.textContent='⚠️ Нет считываний. Поднесите карту.';hint.style.color='var(--a2)';}
+}
+async function regNfc(){
+  var uid=document.getElementById('nfc-uid').value.trim(),tl=document.getElementById('nfc-team').value.trim();
+  var res=document.getElementById('nfc-res');
+  if(!uid||!tl){res.textContent='⚠️ Заполните UID и команду';res.style.color='var(--a2)';return;}
+  var r=await fetch('/api/nfc/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:uid,team_login:tl})});
+  var d=await r.json();
+  if(d.ok){res.textContent='✓ Привязано: '+uid+' → «'+tl+'»';res.style.color='var(--gr)';document.getElementById('nfc-uid').value='';loadNfcCards();}
+  else{res.textContent='✗ '+(d.error||'Ошибка');res.style.color='var(--a2)';}
+}
+async function loadNfcCards(){
+  var r=await fetch('/api/nfc/list');var d=await r.json();if(!d.ok)return;
+  var t=document.getElementById('nfcTbl');
+  if(!d.cards.length){t.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--mt);padding:18px">Карты не привязаны</td></tr>';return;}
+  t.innerHTML=d.cards.map(function(c){return '<tr id="nc-'+c.id+'"><td><code style="color:var(--ac);letter-spacing:1px">'+c.UID+'</code></td><td><strong>'+c.Team_Login+'</strong></td><td style="color:var(--mt)">'+c.Registered_At+'</td><td><button class="btn btn-d btn-sm" data-action="del-nfc" data-id="'+c.id+'">Удалить</button></td></tr>';}).join('');
+}
+async function delNfc(id){
+  if(!confirm('Удалить привязку?'))return;
+  await fetch('/api/nfc/delete/'+id,{method:'DELETE'});
+  var row=document.getElementById('nc-'+id);if(row)row.remove();
+  toast('Привязка удалена','ok');
+}
+async function loadAdminRes(){
+  var r=await fetch('/api/shop/reservations');var d=await r.json();if(!d.ok)return;
+  var t=document.getElementById('resTbl');
+  if(!d.reservations.length){t.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--mt);padding:18px">Нет активных броней</td></tr>';return;}
+  t.innerHTML=d.reservations.map(function(r2){return '<tr id="res-'+r2.id+'"><td><strong>'+r2.Team_Name+'</strong></td><td>'+r2.Item_Name+'</td><td>'+r2.Quantity+'</td><td style="color:var(--a2)">'+r2.Total_Cost+'</td><td style="color:var(--mt);font-size:12px">'+(r2.Expires_At||'').slice(11,16)+'</td><td><span class="rexp ok" data-exp="'+(r2.Expires_At||'')+'">—</span></td><td><button class="btn btn-d btn-sm" data-action="del-res" data-id="'+r2.id+'">Отменить</button></td></tr>';}).join('');
+  tickRes();
+}
+async function delRes(id){
+  if(!confirm('Отменить бронь?'))return;
+  await fetch('/api/shop/cancel_reservation/'+id,{method:'POST'});
+  var row=document.getElementById('res-'+id);if(row)row.remove();
+  toast('Бронь отменена','ok');
+}
+function tickRes(){document.querySelectorAll('.rexp[data-exp]').forEach(function(el){var left=new Date(el.dataset.exp.replace(' ','T'))-Date.now();if(left<=0){el.textContent='Просрочена';el.className='rexp danger';return;}var m=Math.floor(left/60000),s=Math.floor((left%60000)/1000);el.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');el.className='rexp '+(left<60000?'danger':left<180000?'warn':'ok');});}
+setInterval(tickRes,500);
+
+// ── GAME TIMER ──
+var _gEndsAt = null;
+var _gTotalS = null;
+var _gTimer  = null;
+var _gTick   = null;
+
+function setDur(secs) {
+  document.getElementById('durH').value = Math.floor(secs / 3600);
+  document.getElementById('durM').value = Math.floor((secs % 3600) / 60);
+  document.querySelectorAll('.dur-btn').forEach(function(b) { b.classList.remove('sel'); });
+  // highlight clicked button
+  var btns = document.querySelectorAll('.dur-btn');
+  btns.forEach(function(b) {
+    if (parseInt(b.getAttribute('data-secs')) === secs) b.classList.add('sel');
+  });
+}
+
+async function startGame() {
+  var h = parseInt(document.getElementById('durH').value) || 0;
+  var m = parseInt(document.getElementById('durM').value) || 0;
+  var total = h * 3600 + m * 60;
+  if (total < 60)     { toast('Минимум 1 минута', 'err'); return; }
+  if (total > 172800) { toast('Максимум 48 часов', 'err'); return; }
+  try {
+    var r = await fetch('/api/admin/game/start', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({duration_s: total})
+    });
+    var d = await r.json();
+    if (d.ok) {
+      _gEndsAt = null; _gTotalS = null;
+      toast('▶ Игра началась!', 'ok');
+      await refreshGame();
+    } else {
+      toast('Ошибка: ' + (d.error || 'неизвестная'), 'err');
+    }
+  } catch(e) { toast('Нет связи с сервером', 'err'); }
+}
+
+async function stopGame() {
+  if (!confirm('Остановить игру досрочно? Экраны команд заблокируются.')) return;
+  try {
+    var r = await fetch('/api/admin/game/stop', {
+      method: 'POST', headers: {'Content-Type': 'application/json'}
+    });
+    var d = await r.json();
+    if (d.ok) {
+      _gEndsAt = null; _gTotalS = null;
+      clearTimeout(_gTick);
+      toast('⏹ Игра остановлена', 'ok');
+      await refreshGame();
+    } else {
+      toast('Ошибка: ' + (d.error || 'неизвестная'), 'err');
+    }
+  } catch(e) { toast('Нет связи с сервером', 'err'); }
+}
+
+async function resetGame() {
+  if (!confirm('Сбросить игру и все данные команд?\nСчета → 500, покупки и статистика удалятся. Необратимо!')) return;
+  try {
+    var r = await fetch('/api/admin/game/reset', {
+      method: 'POST', headers: {'Content-Type': 'application/json'}
+    });
+    var d = await r.json();
+    if (d.ok) {
+      toast('🔄 Игра сброшена. Данные обнулены.', 'ok');
+      setTimeout(function() { location.reload(); }, 1200);
+    } else {
+      toast('Ошибка: ' + (d.error || 'неизвестная'), 'err');
+    }
+  } catch(e) { toast('Нет связи с сервером', 'err'); }
+}
+
+async function refreshGame() {
+  clearTimeout(_gTimer);
+  try {
+    var r = await fetch('/api/game/status');
+    var d = await r.json();
+    if (!d.ok) return;
+    _applyGameUI(d);
+  } catch(e) {}
+  // Always re-poll every 2s so UI stays in sync
+  _gTimer = setTimeout(refreshGame, 2000);
+}
+
+function _applyGameUI(d) {
+  var big   = document.getElementById('gTimerBig');
+  var fill  = document.getElementById('gTimerFill');
+  var badge = document.getElementById('gStatusBadge');
+  var info  = document.getElementById('gInfo');
+  var idleP = document.getElementById('gIdlePanel');
+  var runP  = document.getElementById('gRunPanel');
+  var finP  = document.getElementById('gFinPanel');
+
+  // Hide all panels first, then show the right one
+  if (idleP) idleP.style.display = 'none';
+  if (runP)  runP.style.display  = 'none';
+  if (finP)  finP.style.display  = 'none';
+
+  if (d.status === 'idle') {
+    if (big)   { big.textContent = '--:--:--'; big.style.color = 'var(--mt)'; }
+    if (fill)  fill.style.width = '100%';
+    if (badge) { badge.textContent = '⚪ Ожидание'; badge.className = 'game-status-badge gsb-idle'; }
+    if (info)  info.textContent = 'Запустите игру — команды смогут войти после старта.';
+    if (idleP) idleP.style.display = 'block';
+    _gEndsAt = null; _gTotalS = null;
+    clearTimeout(_gTick);
+    return;
+  }
+
+  if (d.status === 'finished') {
+    if (big)   { big.textContent = '00:00:00'; big.style.color = 'var(--rd)'; }
+    if (fill)  fill.style.width = '0%';
+    if (badge) { badge.textContent = '🏆 Завершена'; badge.className = 'game-status-badge gsb-finished'; }
+    if (info)  info.textContent = 'Игра завершена. Оцените постройки команд ниже.';
+    if (finP)  finP.style.display = 'block';
+    _gEndsAt = null; _gTotalS = null;
+    clearTimeout(_gTick);
+    return;
+  }
+
+  // ── RUNNING ──
+  if (badge) { badge.textContent = '▶ Идёт'; badge.className = 'game-status-badge gsb-running'; }
+  if (runP)  runP.style.display = 'block';
+
+  if (d.ends_at) {
+    _gEndsAt = new Date(d.ends_at.replace(' ', 'T'));
+    if (d.started_at) {
+      var start = new Date(d.started_at.replace(' ', 'T'));
+      _gTotalS  = Math.max(1, (_gEndsAt - start) / 1000);
+    }
+    if (info) {
+      info.textContent = 'Завершится в ' +
+        _gEndsAt.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'});
+    }
+  }
+
+  // Start live countdown
+  clearTimeout(_gTick);
+  _tickCountdown(big, fill);
+}
+
+function _tickCountdown(big, fill) {
+  if (!_gEndsAt) return;
+  var left = Math.max(0, (_gEndsAt - Date.now()) / 1000);
+  var h = Math.floor(left / 3600);
+  var m = Math.floor((left % 3600) / 60);
+  var s = Math.floor(left % 60);
+  var txt = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+
+  if (big) {
+    big.textContent  = txt;
+    big.style.color  = left < 60 ? 'var(--rd)' : left < 300 ? 'var(--yw)' : 'var(--ac)';
+  }
+  if (fill && _gTotalS) {
+    fill.style.width = Math.max(0, (left / _gTotalS) * 100) + '%';
+  }
+
+  if (left <= 0) {
+    // Game ended — refresh to get finished state
+    refreshGame();
+    return;
+  }
+  _gTick = setTimeout(function() {
+    _tickCountdown(
+      document.getElementById('gTimerBig'),
+      document.getElementById('gTimerFill')
+    );
+  }, 500);
+}
+
+// ── BUILD SCORING ──
+function quickScore(teamId, login, pts) {
+  var inp = document.getElementById('sinp-' + teamId);
+  if (inp) inp.value = pts;
+  scoreTeam(teamId, login);
+}
+
+async function scoreTeam(teamId, login) {
+  var inp   = document.getElementById('sinp-' + teamId);
+  var msgEl = document.getElementById('smsg-' + teamId);
+
+  if (!login) {
+    if (msgEl) { msgEl.textContent = '⚠️ Ошибка: имя команды не передано'; msgEl.style.color = 'var(--a2)'; msgEl.style.display = 'block'; }
+    return;
+  }
+
+  var pts = parseInt(inp ? inp.value : 0);
+  if (!pts || pts < 1) {
+    if (msgEl) { msgEl.textContent = '⚠️ Введите количество баллов (больше 0)'; msgEl.style.color = 'var(--a2)'; msgEl.style.display = 'block'; }
+    return;
+  }
+
+  // Disable button while processing
+  var btn = inp ? inp.parentElement.querySelector('.btn-p') : null;
+  if (btn) btn.disabled = true;
+
+  try {
+    var resp = await fetch('/api/admin/score_build', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({team_login: login, points: pts})
+    });
+    var d = await resp.json();
+
+    if (d.ok) {
+      var balEl = document.getElementById('sbal-' + teamId);
+      if (balEl) balEl.textContent = d.new_balance;
+      if (msgEl) {
+        msgEl.textContent = '✓ +' + pts + ' очков начислено. Баланс: ' + d.new_balance + ' оч.';
+        msgEl.style.color = 'var(--gr)';
+        msgEl.style.display = 'block';
+      }
+      toast('✓ +' + pts + ' очков → ' + login, 'ok');
+      setTimeout(function() { if (msgEl) msgEl.style.display = 'none'; }, 5000);
+      loadLB();
+    } else if (d.error === 'SESSION_EXPIRED') {
+      // Re-login automatically using localStorage
+      var savedLogin = localStorage.getItem('quest_login');
+      var savedPass  = localStorage.getItem('quest_pass');
+      if (savedLogin && savedPass) {
+        var r2 = await fetch('/login', {
+          method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({login: savedLogin, password: savedPass})
+        });
+        var d2 = await r2.json();
+        if (d2.ok) {
+          // Retry the score
+          scoreTeam(teamId, login);
+          return;
+        }
+      }
+      if (msgEl) { msgEl.textContent = '✗ Сессия истекла. Обновите страницу.'; msgEl.style.color = 'var(--a2)'; msgEl.style.display = 'block'; }
+      toast('Сессия истекла — обновите страницу', 'err');
+    } else {
+      var errMsg = d.error || 'Неизвестная ошибка сервера';
+      if (msgEl) { msgEl.textContent = '✗ ' + errMsg; msgEl.style.color = 'var(--a2)'; msgEl.style.display = 'block'; }
+      toast('✗ ' + errMsg, 'err');
+    }
+  } catch(e) {
+    if (msgEl) { msgEl.textContent = '✗ Нет связи с сервером'; msgEl.style.color = 'var(--a2)'; msgEl.style.display = 'block'; }
+    toast('Нет связи с сервером', 'err');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+
+// ── SETTINGS ──
+async function loadSettings() {
+  try {
+    var r = await fetch('/api/admin/settings');
+    var d = await r.json();
+    if (!d.ok) return;
+    var ttl = document.getElementById('ttl');
+    var ri  = document.getElementById('refreshInput');
+    if (ttl) ttl.value = d.settings.reservation_ttl_minutes || 5;
+    if (ri)  ri.value  = d.settings.refresh_interval_s || 10;
+  } catch(e) {}
+}
+async function saveTtl() {
+  var v = parseInt(document.getElementById('ttl').value); if(!v||v<1) return;
+  var r = await fetch('/api/admin/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reservation_ttl_minutes:v})});
+  var d = await r.json();
+  var msg = document.getElementById('ttlMsg'); msg.style.display='block';
+  if(d.ok){msg.textContent='✓ Сохранено: '+v+' мин.';msg.style.color='var(--gr)';}
+  else{msg.textContent='✗ Ошибка';msg.style.color='var(--a2)';}
+  setTimeout(function(){msg.style.display='none';},3000);
+}
+async function saveRefresh() {
+  var v = parseInt(document.getElementById('refreshInput').value);
+  if (!v||v<3) v=3; if(v>120) v=120;
+  var r = await fetch('/api/admin/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({refresh_interval_s:v})});
+  var d = await r.json();
+  var msg=document.getElementById('refreshMsg');msg.style.display='block';
+  if(d.ok){msg.textContent='✓ Сохранено: '+v+' сек.';msg.style.color='var(--gr)';}
+  else{msg.textContent='✗ Ошибка';msg.style.color='var(--a2)';}
+  setTimeout(function(){msg.style.display='none';},3000);
+}
+async function doReset() {
+  var r = await fetch('/api/admin/reset_all',{method:'POST'});
+  var d = await r.json();
+  if(d.ok){toast('✓ Данные сброшены','ok');setTimeout(function(){location.reload();},1000);}
+  else toast('Ошибка','err');
+}
+
+// ── IMAGE UPLOAD ──
+function prevImg(url,prevId){var el=document.getElementById(prevId);if(!el)return;if(url){el.src=url;el.style.display='block';el.onerror=function(){this.style.display='none';};}else el.style.display='none';}
+async function uploadImg(fileInput,targetId,prevId){
+  var file=fileInput.files[0];if(!file)return;
+  var fd=new FormData();fd.append('file',file);
+  var r=await fetch('/api/admin/upload_image',{method:'POST',body:fd});
+  var d=await r.json();fileInput.value='';
+  if(d.ok){document.getElementById(targetId).value=d.url;prevImg(d.url,prevId);toast('✓ Картинка загружена','ok');}
+  else toast('✗ '+(d.error||'Ошибка'),'err');
+}
+
+// ── AUTO-REFRESH ──
+var _adminRefreshMs = 10000;
+var _adminTimer     = null;
+
+(async function initAdminRefresh(){
+  try{var r=await fetch('/api/settings/public');var d=await r.json();if(d.ok&&d.refresh_interval_s)_adminRefreshMs=Math.max(3,d.refresh_interval_s)*1000;}catch(e){}
+  scheduleAdminRefresh();
+})();
+
+function scheduleAdminRefresh(){
+  clearTimeout(_adminTimer);
+  _adminTimer=setTimeout(function(){
+    var pg=document.querySelector('.page.on');
+    if(pg){
+      var id=pg.id;
+      if(id==='page-lb')   loadLB();
+      if(id==='page-nfc')  { loadAdminRes(); }
+      if(id==='page-game') refreshGame();
+    }
+    scheduleAdminRefresh();
+  }, _adminRefreshMs);
+}
+
+// ── INIT ──
+loadLB();
+setInterval(loadLB, 15000);
+refreshGame();  // self-reschedules every 2s
+</script>
+</body>
+</html>

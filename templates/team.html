@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ team.Login }} — Команда</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #060d16;
+  --s1: #0b1929;
+  --s2: #0f2035;
+  --s3: #132540;
+  --bd: #1a3356;
+  --ac: #00c8f0;
+  --a2: #ff7043;
+  --gr: #00e676;
+  --yw: #ffd740;
+  --rd: #ff5252;
+  --pu: #d4aaff;
+  --tx: #e8f4fd;
+  --mt: #527090;
+  --glow: rgba(0,200,240,.15);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--tx); font-family: 'Exo 2', sans-serif; min-height: 100vh; }
+
+/* ── HEADER ── */
+header {
+  background: linear-gradient(180deg, #0d2140 0%, #091828 100%);
+  border-bottom: 1px solid var(--bd);
+  padding: 0 24px;
+  display: flex; align-items: stretch;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 4px 32px rgba(0,0,0,.6);
+}
+.hlogo {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 24px 14px 0; border-right: 1px solid var(--bd);
+  margin-right: 20px;
+}
+.hlogo-icon { font-size: 26px; }
+.hlogo-txt { font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 900; color: var(--ac); line-height: 1.35; }
+.hteam { display: flex; align-items: center; gap: 10px; flex: 1; }
+.hteam-name { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 900; letter-spacing: .5px; }
+.htag {
+  padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700;
+  letter-spacing: .5px; text-transform: uppercase;
+}
+.htag-class { background: rgba(255,215,64,.12); border: 1px solid rgba(255,215,64,.4); color: var(--yw); }
+.htag-nfc-ok { background: rgba(212,170,255,.12); border: 1px solid rgba(212,170,255,.4); color: var(--pu); }
+.htag-nfc-no { background: rgba(82,112,144,.1); border: 1px solid rgba(82,112,144,.3); color: var(--mt); }
+.hright { display: flex; align-items: center; gap: 14px; padding: 12px 0 12px 24px; border-left: 1px solid var(--bd); margin-left: auto; }
+.hbal {
+  text-align: center;
+  background: linear-gradient(135deg, rgba(0,200,240,.1), rgba(0,200,240,.04));
+  border: 1px solid rgba(0,200,240,.3); border-radius: 12px; padding: 8px 20px;
+}
+.hbal-label { font-size: 10px; color: var(--mt); text-transform: uppercase; letter-spacing: 1px; }
+.hbal-val { font-family: 'Orbitron', sans-serif; font-size: 22px; font-weight: 900; color: var(--ac); line-height: 1.1; }
+.hbal-sub { font-size: 10px; color: var(--mt); margin-top: 1px; }
+.logout-btn {
+  background: rgba(255,112,67,.08); border: 1px solid rgba(255,112,67,.3);
+  color: var(--a2); padding: 9px 16px; border-radius: 9px; cursor: pointer;
+  font-size: 13px; text-decoration: none; font-weight: 600; transition: all .2s;
+  white-space: nowrap;
+}
+.logout-btn:hover { background: rgba(255,112,67,.18); border-color: var(--a2); }
+
+/* ── LAYOUT ── */
+main { max-width: 1280px; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
+
+/* ── STAT CARDS ── */
+.stats { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.sc {
+  background: var(--s1); border: 1px solid var(--bd); border-radius: 14px;
+  padding: 18px 14px; text-align: center; position: relative; overflow: hidden;
+  transition: transform .2s, box-shadow .2s;
+}
+.sc:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,0,0,.4); }
+.sc::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 3px 3px 0 0; }
+.sc.bl::before { background: linear-gradient(90deg, #00c8f0, #0080a0); }
+.sc.or::before { background: linear-gradient(90deg, #ff7043, #cc3300); }
+.sc.yw::before { background: linear-gradient(90deg, #ffd740, #cc9900); }
+.sc.gr::before { background: linear-gradient(90deg, #00e676, #00a050); }
+.sc-icon { font-size: 22px; margin-bottom: 6px; opacity: .8; }
+.sc-val { font-family: 'Orbitron', sans-serif; font-size: 26px; font-weight: 900; line-height: 1; }
+.sc.bl .sc-val { color: var(--ac); }
+.sc.or .sc-val { color: var(--a2); }
+.sc.yw .sc-val { color: var(--yw); }
+.sc.gr .sc-val { color: var(--gr); }
+.sc-label { font-size: 11px; color: var(--mt); margin-top: 5px; text-transform: uppercase; letter-spacing: .5px; }
+
+/* ── PANEL ── */
+.panel {
+  background: var(--s1); border: 1px solid var(--bd); border-radius: 14px;
+  overflow: hidden; margin-bottom: 18px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.3);
+}
+.ph {
+  padding: 14px 18px; border-bottom: 1px solid var(--bd);
+  display: flex; align-items: center; gap: 9px;
+  background: linear-gradient(180deg, rgba(255,255,255,.03) 0%, transparent 100%);
+}
+.ph-icon { font-size: 18px; }
+.ph h2 {
+  font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 2px; color: var(--tx);
+}
+.ph-hint { margin-left: auto; font-size: 11px; color: var(--mt); }
+.pb { padding: 16px; }
+
+/* ── ACTIVE RESERVATION ── */
+.res-card {
+  background: linear-gradient(135deg, rgba(0,200,240,.08), rgba(0,200,240,.03));
+  border: 2px solid rgba(0,200,240,.5);
+  border-radius: 16px; padding: 18px; margin-bottom: 18px;
+  box-shadow: 0 0 30px rgba(0,200,240,.1), inset 0 1px 0 rgba(255,255,255,.05);
+  animation: resAppear .4s ease;
+}
+@keyframes resAppear { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+.res-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.res-badge {
+  background: rgba(0,200,240,.15); border: 1px solid rgba(0,200,240,.4);
+  color: var(--ac); padding: 5px 12px; border-radius: 20px;
+  font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+}
+.res-timer {
+  margin-left: auto; display: flex; align-items: center; gap: 6px;
+  font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 900;
+  color: var(--gr); background: rgba(0,230,118,.1); border: 1px solid rgba(0,230,118,.4);
+  padding: 6px 14px; border-radius: 10px; transition: all .3s;
+}
+.res-timer.warn { color: var(--yw); background: rgba(255,215,64,.1); border-color: rgba(255,215,64,.4); }
+.res-timer.danger { color: var(--rd); background: rgba(255,82,82,.1); border-color: rgba(255,82,82,.5); animation: pulse .6s ease infinite; }
+@keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+.res-progress { height: 5px; background: rgba(255,255,255,.08); border-radius: 3px; margin-bottom: 14px; overflow: hidden; }
+.res-bar { height: 100%; background: linear-gradient(90deg, var(--ac), var(--gr)); border-radius: 3px; transition: width .5s linear; }
+.res-items { margin-bottom: 12px; }
+.res-item-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px; margin-bottom: 4px;
+  background: rgba(255,255,255,.04); border-radius: 8px; font-size: 14px;
+}
+.res-item-row:last-child { margin-bottom: 0; }
+.res-item-name { font-weight: 600; }
+.res-item-qty { color: var(--mt); font-size: 12px; }
+.res-item-cost { color: var(--a2); font-weight: 700; font-family: 'Orbitron', sans-serif; font-size: 13px; }
+.res-total-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 0 10px; border-top: 1px solid rgba(0,200,240,.2);
+  margin-top: 4px;
+}
+.res-total-label { font-size: 13px; color: var(--mt); }
+.res-total-val { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 900; color: var(--yw); }
+.res-nfc-hint {
+  text-align: center; font-size: 13px; color: var(--pu);
+  background: rgba(212,170,255,.08); border: 1px solid rgba(212,170,255,.2);
+  border-radius: 9px; padding: 9px; margin-bottom: 12px;
+}
+/* CANCEL RESERVATION BUTTON — big, obvious */
+.cancel-res-btn {
+  width: 100%; padding: 14px;
+  background: rgba(255,82,82,.08); border: 2px solid rgba(255,82,82,.5);
+  color: var(--rd); border-radius: 11px; cursor: pointer;
+  font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 6px;
+}
+.cancel-res-btn:hover {
+  background: rgba(255,82,82,.18); border-color: var(--rd);
+  box-shadow: 0 4px 16px rgba(255,82,82,.25);
+  transform: translateY(-1px);
+}
+.cancel-res-btn:active { transform: translateY(0); }
+
+/* ── CATALOG ── */
+.cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.citem {
+  background: var(--s2); border: 1px solid var(--bd); border-radius: 12px;
+  overflow: hidden; cursor: pointer; transition: all .2s; position: relative;
+}
+.citem:hover:not(.oos) { border-color: var(--ac); transform: translateY(-3px); box-shadow: 0 6px 24px rgba(0,200,240,.15); }
+.citem.oos { opacity: .4; cursor: default; }
+.citem.incart { border-color: var(--gr); background: rgba(0,230,118,.04); }
+.citem-img { width: 100%; height: 100px; object-fit: cover; display: block; }
+.citem-em { width: 100%; height: 100px; display: flex; align-items: center; justify-content: center; font-size: 40px; background: var(--s3); }
+.citem-body { padding: 11px; }
+.citem-name { font-size: 13px; font-weight: 700; margin-bottom: 5px; }
+.citem-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.citem-price { color: var(--ac); font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 700; }
+.citem-w { color: var(--mt); font-size: 11px; }
+.citem-avail { font-size: 11px; margin-bottom: 8px; font-weight: 600; }
+.av-ok { color: var(--gr); } .av-low { color: var(--yw); } .av-none { color: var(--rd); }
+.qty-row { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.qb {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(255,255,255,.07); border: 1px solid var(--bd); color: var(--tx);
+  font-size: 17px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  line-height: 1; transition: all .15s;
+}
+.qb:hover { background: var(--ac); color: #000; border-color: var(--ac); transform: scale(1.1); }
+.qv { font-family: 'Orbitron', sans-serif; font-size: 15px; font-weight: 900; min-width: 22px; text-align: center; }
+.cdot {
+  position: absolute; top: 8px; right: 8px; width: 20px; height: 20px; border-radius: 50%;
+  background: var(--ac); color: #000; font-size: 11px; font-weight: 900;
+  display: none; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,200,240,.5);
+}
+
+/* ── CART ── */
+.cart-empty { color: var(--mt); text-align: center; padding: 22px 0; font-size: 14px; }
+.cart-row {
+  display: flex; align-items: center; gap: 8px; padding: 9px 0;
+  border-bottom: 1px solid rgba(255,255,255,.04); font-size: 13px;
+}
+.cr-name { flex: 1; font-weight: 600; }
+.cr-qty { color: var(--mt); min-width: 30px; text-align: center; }
+.cr-cost { color: var(--a2); font-weight: 700; font-family: 'Orbitron', sans-serif; font-size: 12px; min-width: 65px; text-align: right; }
+.cr-rm { background: none; border: none; color: var(--mt); cursor: pointer; font-size: 16px; padding: 0 4px; line-height: 1; transition: color .15s; }
+.cr-rm:hover { color: var(--rd); }
+.cart-total { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-top: 1px solid var(--bd); margin-top: 6px; }
+.ct-label { font-size: 14px; color: var(--mt); }
+.ct-val { font-family: 'Orbitron', sans-serif; font-size: 22px; font-weight: 900; color: var(--yw); }
+.book-btn {
+  width: 100%; padding: 15px; border: none; border-radius: 11px;
+  font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 900; letter-spacing: 1px;
+  cursor: pointer; margin-top: 10px;
+  background: linear-gradient(135deg, #00c8f0, #0080a8);
+  color: #000; transition: all .2s;
+}
+.book-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(0,200,240,.4); }
+.book-btn:disabled { opacity: .3; cursor: default; transform: none; box-shadow: none; }
+.book-hint { text-align: center; font-size: 11px; color: var(--mt); margin-top: 8px; line-height: 1.5; }
+
+/* ── ASSIGNMENTS ── */
+/* Subject group */
+.subj-group { margin-bottom: 16px; }
+.subj-group:last-child { margin-bottom: 0; }
+.subj-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px; border-radius: 10px; cursor: pointer;
+  user-select: none; transition: all .2s; margin-bottom: 8px;
+}
+.subj-header:hover { filter: brightness(1.15); }
+.subj-header.физика  { background: rgba(0,200,240,.1);  border: 1px solid rgba(0,200,240,.3); }
+.subj-header.математика { background: rgba(255,215,64,.1); border: 1px solid rgba(255,215,64,.3); }
+.subj-header.информатика{ background: rgba(0,230,118,.1);  border: 1px solid rgba(0,230,118,.3); }
+.subj-icon { font-size: 20px; }
+.subj-name { font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 700; }
+.subj-header.физика   .subj-name { color: var(--ac); }
+.subj-header.математика .subj-name { color: var(--yw); }
+.subj-header.информатика .subj-name { color: var(--gr); }
+.subj-count { margin-left: auto; font-size: 12px; color: var(--mt); }
+.subj-arrow { font-size: 12px; color: var(--mt); transition: transform .25s; }
+.subj-header.open .subj-arrow { transform: rotate(90deg); }
+.subj-body { display: none; padding-left: 4px; }
+.subj-body.open { display: block; }
+/* Assignment card */
+.acard {
+  background: var(--s2); border: 1px solid var(--bd); border-radius: 11px;
+  padding: 14px; margin-bottom: 8px; transition: border-color .2s;
+}
+.acard:last-child { margin-bottom: 0; }
+.acard:hover:not(.solved):not(.wrong) { border-color: rgba(0,200,240,.25); }
+.acard.solved { border-color: rgba(0,230,118,.5); background: rgba(0,230,118,.05); }
+.acard.wrong  { border-color: rgba(255,82,82,.35); background: rgba(255,82,82,.04); opacity: .7; }
+.aptag { display: inline-block; background: rgba(255,112,67,.1); border: 1px solid rgba(255,112,67,.3); color: var(--a2); padding: 3px 9px; border-radius: 8px; font-size: 11px; font-weight: 700; margin-bottom: 10px; }
+.aq { font-size: 14px; line-height: 1.65; margin-bottom: 12px; color: var(--tx); }
+.aimg { width: 100%; border-radius: 9px; margin-bottom: 12px; max-height: 200px; object-fit: contain; background: var(--s1); }
+/* Answer row — fixed layout, no wrapping */
+.arow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: stretch;
+}
+.ain {
+  padding: 11px 14px;
+  background: rgba(255,255,255,.05); border: 1px solid var(--bd);
+  border-radius: 9px; color: var(--tx); font-family: 'Exo 2', sans-serif; font-size: 14px; outline: none;
+  transition: border-color .2s; width: 100%;
+}
+.ain:focus { border-color: var(--ac); box-shadow: 0 0 0 3px rgba(0,200,240,.1); }
+.ain:disabled { opacity: .5; cursor: default; }
+.abtn {
+  padding: 11px 16px;
+  background: linear-gradient(135deg, var(--ac), #0080a8);
+  border: none; border-radius: 9px; color: #000;
+  font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 700;
+  cursor: pointer; white-space: nowrap; transition: all .2s;
+  height: 100%; min-width: 100px;
+}
+.abtn:hover:not(:disabled) { box-shadow: 0 4px 14px rgba(0,200,240,.3); }
+.abtn:disabled { opacity: .35; cursor: default; }
+.abtn.wrong-state { background: rgba(255,82,82,.2); color: var(--rd); border: 1px solid rgba(255,82,82,.4); }
+.ares { margin-top: 9px; padding: 8px 12px; border-radius: 8px; font-size: 13px; display: none; font-weight: 600; }
+.ares.ok  { background: rgba(0,230,118,.1);  color: var(--gr); border: 1px solid rgba(0,230,118,.35); }
+.ares.err { background: rgba(255,82,82,.1);  color: var(--rd); border: 1px solid rgba(255,82,82,.35); }
+.wrong-hint { font-size: 12px; color: var(--mt); margin-top: 6px; font-style: italic; }
+
+/* ── ORDERS ── */
+.otbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+.otbl th { padding: 9px 11px; text-align: left; color: var(--mt); font-size: 10px; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--bd); font-weight: 600; }
+.otbl td { padding: 9px 11px; border-bottom: 1px solid rgba(255,255,255,.03); }
+.otbl tr:last-child td { border-bottom: none; }
+.otbl tr:hover td { background: rgba(255,255,255,.02); }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 20px; right: 20px; z-index: 9999;
+  background: var(--s1); border: 1px solid var(--bd); border-radius: 13px;
+  padding: 14px 22px; font-size: 14px; font-weight: 600;
+  box-shadow: 0 10px 40px rgba(0,0,0,.6);
+  transform: translateX(120%); transition: transform .35s cubic-bezier(.16,1,.3,1);
+  max-width: 320px;
+}
+.toast.show { transform: translateX(0); }
+.toast.ok { border-color: var(--gr); box-shadow: 0 10px 40px rgba(0,230,118,.15); }
+.toast.err { border-color: var(--rd); box-shadow: 0 10px 40px rgba(255,82,82,.15); }
+.toast.info { border-color: var(--ac); }
+.toast.pts { border-color: var(--yw); box-shadow: 0 10px 40px rgba(255,215,64,.15); }
+
+/* ── GAME TIMER ── */
+.gtimer-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  height: 5px; background: rgba(255,255,255,.06);
+}
+.gtimer-fill {
+  height: 100%; background: linear-gradient(90deg, var(--ac), var(--gr));
+  transition: width 1s linear;
+}
+.gtimer-widget {
+  position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
+  z-index: 201; display: flex; align-items: center; gap: 10px;
+  background: rgba(11,25,41,.95); border: 1px solid var(--bd);
+  border-radius: 30px; padding: 7px 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,.5);
+  font-family: 'Orbitron', sans-serif;
+  backdrop-filter: blur(10px);
+}
+.gtimer-label { font-size: 10px; color: var(--mt); text-transform: uppercase; letter-spacing: 1px; }
+.gtimer-val   { font-size: 18px; font-weight: 900; color: var(--ac); letter-spacing: 2px; }
+.gtimer-widget.warn  .gtimer-val { color: var(--yw); }
+.gtimer-widget.danger .gtimer-val { color: var(--rd); animation: tpulse .7s ease infinite; }
+@keyframes tpulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+/* LOCK SCREEN */
+.lockscreen {
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  background: #030810;
+  flex-direction: column; align-items: center; justify-content: center;
+  text-align: center;
+}
+.lockscreen.show { display: flex; }
+.ls-icon { font-size: 80px; margin-bottom: 24px; animation: lsbounce 2s ease infinite; }
+@keyframes lsbounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+.ls-title {
+  font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 900;
+  color: var(--yw); margin-bottom: 16px; line-height: 1.3;
+  text-shadow: 0 0 30px rgba(255,215,64,.4);
+}
+.ls-sub { font-size: 18px; color: var(--mt); max-width: 500px; line-height: 1.6; }
+.ls-team { font-family: 'Orbitron', sans-serif; font-size: 14px; color: var(--ac); margin-top: 20px; }
+@media (max-width: 960px) {
+  main { grid-template-columns: 1fr; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+  .stats { grid-template-columns: 1fr 1fr; }
+  .cat-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- GAME TIMER BAR -->
+<div class="gtimer-bar"><div class="gtimer-fill" id="gFill" style="width:100%"></div></div>
+<div class="gtimer-widget" id="gWidget" style="display:none">
+  <span class="gtimer-label">⏱ Время игры</span>
+  <span class="gtimer-val" id="gVal">--:--:--</span>
+</div>
+<!-- LOCK SCREEN -->
+<div class="lockscreen" id="lockScreen">
+  <div class="ls-icon">🏆</div>
+  <div class="ls-title">ВРЕМЯ ВЫШЛО!<br>ИГРА ЗАВЕРШЕНА</div>
+  <div class="ls-sub">ПОДОЙДИТЕ К ОРГАНИЗАТОРАМ<br>ДЛЯ ОЦЕНКИ РАБОТ</div>
+  <div class="ls-team">Команда: {{ team.Login }}</div>
+</div>
+
+<header>
+  <div class="hlogo">
+    <span class="hlogo-icon">🏗️</span>
+    <div class="hlogo-txt">ИНЖЕНЕРНЫЙ<br>ХАКАТОН</div>
+  </div>
+  <div class="hteam">
+    <span class="hteam-name">{{ team.Login }}</span>
+    <span class="htag htag-class">{{ team.Class }} класс</span>
+    {% if nfc_card %}
+    <span class="htag htag-nfc-ok">💳 NFC привязана</span>
+    {% else %}
+    <span class="htag htag-nfc-no">💳 NFC не привязана</span>
+    {% endif %}
+  </div>
+  <div class="hright">
+    <div class="hbal">
+      <div class="hbal-label">Баланс</div>
+      <div class="hbal-val" id="hBal">{{ team.Current_Balance }}</div>
+      <div class="hbal-sub">из {{ team.Start_Budget }} очков</div>
+    </div>
+    <a href="/logout" class="logout-btn">🚪 Выйти</a>
+  </div>
+</header>
+
+<main>
+  <!-- STATS -->
+  <div class="stats">
+    <div class="sc bl">
+      <div class="sc-icon">💰</div>
+      <div class="sc-val" id="stBal">{{ team.Current_Balance }}</div>
+      <div class="sc-label">Баланс (очки)</div>
+    </div>
+    <div class="sc or">
+      <div class="sc-icon">🛒</div>
+      <div class="sc-val" id="stSp">{{ team.Spent }}</div>
+      <div class="sc-label">Потрачено</div>
+    </div>
+    <div class="sc yw">
+      <div class="sc-icon">⚖️</div>
+      <div class="sc-val" id="stWt">{{ "%.1f"|format(team.Bridge_Weight) }}</div>
+      <div class="sc-label">Вес моста (г)</div>
+    </div>
+    <div class="sc gr">
+      <div class="sc-icon">✅</div>
+      <div class="sc-val" id="stAs">{{ team.Quantity_Assignments }}</div>
+      <div class="sc-label">Заданий решено</div>
+    </div>
+  </div>
+
+  <!-- LEFT COLUMN -->
+  <div>
+
+    {% set active = reservations | selectattr('Status','equalto','Активна') | list %}
+
+    <!-- ACTIVE RESERVATION -->
+    {% if active %}
+    {% set r0 = active[0] %}
+    <div class="res-card" id="resCard">
+      <div class="res-head">
+        <span style="font-size:22px">📋</span>
+        <span class="res-badge">Активная бронь</span>
+        <div class="res-timer" id="resTimer">
+          <span>⏱</span><span id="timerVal">--:--</span>
+        </div>
+      </div>
+
+      <div class="res-progress">
+        <div class="res-bar" id="resBar"></div>
+      </div>
+
+      <div class="res-items">
+        {% set tot = namespace(v=0) %}
+        {% for r in active %}
+        <div class="res-item-row">
+          <span class="res-item-name">{{ r.Item_Name }}</span>
+          <span class="res-item-qty">× {{ r.Quantity }}</span>
+          <span class="res-item-cost">{{ r.Total_Cost }} оч.</span>
+        </div>
+        {% set tot.v = tot.v + r.Total_Cost %}
+        {% endfor %}
+      </div>
+
+      <div class="res-total-row">
+        <span class="res-total-label">Итого к оплате:</span>
+        <span class="res-total-val">{{ tot.v }} оч.</span>
+      </div>
+
+      <div class="res-nfc-hint">
+        💳 Идите к кладовщику и приложите NFC карту к считывателю
+      </div>
+
+      <!-- CANCEL BUTTONS — один на каждую позицию в брони -->
+      {% for r in active %}
+      <button class="cancel-res-btn" onclick="cancelRes({{ r.id }}, '{{ r.Item_Name | e }}')">
+        <span style="font-size:16px">✕</span>
+        Отменить бронь «{{ r.Item_Name }}»
+      </button>
+      {% endfor %}
+    </div>
+
+    <script>
+    (function(){
+      var exp   = new Date("{{ r0.Expires_At }}".replace(' ','T'));
+      var cre   = new Date("{{ r0.Created_At }}".replace(' ','T'));
+      var total = Math.max(1000, exp - cre);
+      function tick() {
+        var left = exp - Date.now();
+        var tv  = document.getElementById('timerVal');
+        var bar = document.getElementById('resBar');
+        var tmr = document.getElementById('resTimer');
+        if (left <= 0) {
+          if (tv)  tv.textContent  = '00:00';
+          if (bar) bar.style.width = '0%';
+          if (tmr) tmr.className   = 'res-timer danger';
+          setTimeout(function(){ location.reload(); }, 1500);
+          return;
+        }
+        var m = Math.floor(left / 60000);
+        var s = Math.floor((left % 60000) / 1000);
+        if (tv)  tv.textContent  = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+        if (bar) bar.style.width = Math.max(0, Math.min(100, (left / total) * 100)) + '%';
+        if (tmr) tmr.className   = 'res-timer' + (left < 60000 ? ' danger' : left < 180000 ? ' warn' : '');
+        setTimeout(tick, 500);
+      }
+      tick();
+    })();
+    </script>
+    {% endif %}
+
+    <!-- CATALOG -->
+    <div class="panel">
+      <div class="ph">
+        <span class="ph-icon">🛍️</span>
+        <h2>Каталог товаров</h2>
+        {% if active %}
+        <span class="ph-hint" style="color:var(--a2)">⚠ Сначала оплатите или отмените бронь</span>
+        {% else %}
+        <span class="ph-hint">Выберите и забронируйте</span>
+        {% endif %}
+      </div>
+      <div class="pb">
+        {% if active %}
+        <div class="cart-empty" style="padding:30px">
+          У вас есть активная бронь.<br>Оплатите её у кладовщика или отмените выше.
+        </div>
+        {% else %}
+        <div class="cat-grid">
+          {% for item in items %}
+          {% set em = {'палочки':'🪵','клей':'🔧','макароны':'🍝','скотч':'📎','нитки':'🧵'}.get(item.Item_Name.lower().split()[0],'📦') %}
+          <div class="citem{% if item.available==0 %} oos{% endif %}" id="ci{{ item.id }}">
+            <div class="cdot" id="cd{{ item.id }}"></div>
+            {% if item.Image %}
+            <img class="citem-img" src="{{ item.Image }}" alt="{{ item.Item_Name }}"
+                 onload="this.style.display='block'"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+                 style="display:none">
+            <div class="citem-em" style="display:none">{{ em }}</div>
+            {% else %}
+            <div class="citem-em">{{ em }}</div>
+            {% endif %}
+            <div class="citem-body">
+              <div class="citem-name">{{ item.Item_Name }}</div>
+              <div class="citem-meta">
+                <span class="citem-price">{{ item.Price }} оч.</span>
+                <span class="citem-w">{{ item.Item_Weight }} г</span>
+              </div>
+              <div class="citem-avail {% if item.available==0 %}av-none{% elif item.available<=3 %}av-low{% else %}av-ok{% endif %}">
+                {% if item.available==0 %}⛔ Нет в наличии{% elif item.available<=3 %}⚠ Осталось: {{ item.available }} шт{% else %}✓ Доступно: {{ item.available }} шт{% endif %}
+              </div>
+              {% if item.available > 0 %}
+              <div class="qty-row">
+                <button class="qb" onclick="chQ({{ item.id }}, -1)">−</button>
+                <span class="qv" id="qv{{ item.id }}">0</span>
+                <button class="qb" onclick="chQ({{ item.id }}, 1)">+</button>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- ORDER HISTORY -->
+    <div class="panel">
+      <div class="ph"><span class="ph-icon">🧾</span><h2>История покупок</h2></div>
+      {% if orders %}
+      <div style="overflow-x:auto">
+        <table class="otbl">
+          <thead>
+            <tr><th>Товар</th><th>Кол.</th><th>Стоим.</th><th>Время</th><th>Оплата</th><th>Статус</th></tr>
+          </thead>
+          <tbody>
+            {% for o in orders %}
+            <tr>
+              <td style="font-weight:600">{{ o.Item }}</td>
+              <td>{{ o.Quantity }}</td>
+              <td style="color:var(--a2);font-weight:700">−{{ o.Cost }}</td>
+              <td style="color:var(--mt)">{{ o.Time[11:16] if o.Time else '—' }}</td>
+              <td>{% if o.Payment_Method=='NFC' %}<span style="color:var(--pu)">📡 NFC</span>{% else %}<span style="color:var(--ac)">⌨ Ручной</span>{% endif %}</td>
+              <td>{% if o.Status=='Выдан' %}<span style="color:var(--gr)">✓ Выдан</span>{% else %}<span style="color:var(--yw)">⏳ Новый</span>{% endif %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="pb"><div class="cart-empty">Покупок пока нет</div></div>
+      {% endif %}
+    </div>
+
+  </div><!-- /LEFT -->
+
+  <!-- RIGHT COLUMN -->
+  <div>
+
+    <!-- CART -->
+    <div class="panel" style="margin-bottom:18px">
+      <div class="ph"><span class="ph-icon">🧺</span><h2>Корзина</h2></div>
+      <div class="pb">
+        <div id="cartList"><div class="cart-empty">Выберите товары из каталога</div></div>
+        <div class="cart-total" id="cartTot" style="display:none">
+          <span class="ct-label">Итого:</span>
+          <span class="ct-val" id="cartVal">0</span>
+        </div>
+        <button class="book-btn" id="bookBtn" disabled onclick="doReserve()">
+          📋 ЗАБРОНИРОВАТЬ
+        </button>
+        <div class="book-hint">
+          После бронирования у вас будет 5 минут,<br>чтобы дойти до кладовщика и оплатить NFC картой
+        </div>
+      </div>
+    </div>
+
+    <!-- ASSIGNMENTS -->
+    <div class="panel">
+      <div class="ph">
+        <span class="ph-icon">🎯</span>
+        <h2>Задания</h2>
+        <span class="ph-hint">{{ team.Class }} класс · {{ assignments|length }} вопросов</span>
+      </div>
+      <div class="pb">
+        {% if assignments %}
+        {% set subjects = assignments | map(attribute='Subject') | unique | list %}
+        {% set icons = {'Физика':'⚡','Математика':'📐','Информатика':'💻'} %}
+        {% for subject in subjects %}
+        {% set subj_tasks = assignments | selectattr('Subject','equalto',subject) | list %}
+        <div class="subj-group">
+          <div class="subj-header {{ subject|lower }}" onclick="toggleSubj(this)">
+            <span class="subj-icon">{{ icons.get(subject,'📚') }}</span>
+            <span class="subj-name">{{ subject }}</span>
+            <span class="subj-count">{{ subj_tasks|length }} заданий</span>
+            <span class="subj-arrow">▶</span>
+          </div>
+          <div class="subj-body">
+            {% for a in subj_tasks %}
+            <div class="acard" id="ac{{ a.id }}">
+              <div class="aptag">+{{ a.Price }} очков</div>
+              {% if a.Question %}
+              <div class="aq">{{ a.Question }}</div>
+              {% endif %}
+              {% if a.Image %}
+              <img class="aimg" src="{{ a.Image }}" alt="Задание к заданию"
+                   onload="this.style.display='block'"
+                   onerror="this.style.display='none'"
+                   style="display:none">
+              {% endif %}
+              <div class="arow">
+                <input class="ain" id="ans{{ a.id }}" placeholder="Введите ответ..."
+                       onkeydown="if(event.key==='Enter') sendAns({{ a.id }})">
+                <button class="abtn" id="abtn{{ a.id }}" onclick="sendAns({{ a.id }})">ОТВЕТИТЬ</button>
+              </div>
+              <div class="ares" id="ar{{ a.id }}"></div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="cart-empty">Заданий пока нет</div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div><!-- /RIGHT -->
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var ITEMS = {{ items | tojson }};
+var cart  = {};
+
+/* ── CATALOG ── */
+function chQ(id, delta) {
+  var it = ITEMS.find(function(i){ return i.id === id; });
+  if (!it) return;
+  cart[id] = Math.max(0, Math.min(it.available, (cart[id] || 0) + delta));
+  if (!cart[id]) delete cart[id];
+
+  var qv = document.getElementById('qv'  + id);
+  var cd = document.getElementById('cd'  + id);
+  var ci = document.getElementById('ci'  + id);
+  if (qv) qv.textContent = cart[id] || 0;
+  if (cd) { cd.textContent = cart[id] || ''; cd.style.display = cart[id] ? 'flex' : 'none'; }
+  if (ci) { ci.classList.toggle('incart', !!cart[id]); }
+  renderCart();
+}
+
+function renderCart() {
+  var list = document.getElementById('cartList');
+  var tot  = document.getElementById('cartTot');
+  var btn  = document.getElementById('bookBtn');
+  var keys = Object.keys(cart).filter(function(k){ return cart[k] > 0; });
+
+  if (!keys.length) {
+    list.innerHTML = '<div class="cart-empty">Выберите товары из каталога</div>';
+    tot.style.display = 'none';
+    btn.disabled = true;
+    return;
+  }
+
+  var total = 0, html = '';
+  keys.forEach(function(k) {
+    var it   = ITEMS.find(function(i){ return i.id === parseInt(k); });
+    if (!it) return;
+    var cost = it.Price * cart[k];
+    total += cost;
+    html += '<div class="cart-row">'
+          + '<span class="cr-name">' + it.Item_Name + '</span>'
+          + '<span class="cr-qty">×' + cart[k] + '</span>'
+          + '<span class="cr-cost">−' + cost + '</span>'
+          + '<button class="cr-rm" onclick="rmItem(' + k + ')">✕</button>'
+          + '</div>';
+  });
+
+  list.innerHTML = html;
+  document.getElementById('cartVal').textContent = total + ' оч.';
+  tot.style.display = 'flex';
+  btn.disabled = false;
+}
+
+function rmItem(id) {
+  delete cart[id];
+  var qv = document.getElementById('qv' + id);
+  var cd = document.getElementById('cd' + id);
+  var ci = document.getElementById('ci' + id);
+  if (qv) qv.textContent = '0';
+  if (cd) { cd.textContent = ''; cd.style.display = 'none'; }
+  if (ci) ci.classList.remove('incart');
+  renderCart();
+}
+
+/* ── RESERVATION ── */
+async function doReserve() {
+  var cartArr = Object.keys(cart)
+    .filter(function(k){ return cart[k] > 0; })
+    .map(function(k){ return { item_id: parseInt(k), quantity: cart[k] }; });
+
+  if (!cartArr.length) return;
+
+  var btn = document.getElementById('bookBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Бронирование...';
+
+  var resp = await fetch('/api/team/reserve', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ cart: cartArr })
+  });
+  var d = await resp.json();
+
+  btn.disabled = false;
+  btn.textContent = '📋 ЗАБРОНИРОВАТЬ';
+
+  if (d.ok) {
+    updateStats();
+    toast('✅ Бронь создана! Идите к кладовщику с NFC картой', 'ok');
+    setTimeout(function(){ location.reload(); }, 1200);
+  } else {
+    if (d.error === 'Нет доступа') {
+      toast('⚠️ Сессия истекла. Перенаправление на вход...', 'err');
+      setTimeout(function(){ window.location.href = '/login'; }, 2000);
+    } else {
+      toast('✗ ' + d.error, 'err');
+    }
+  }
+}
+
+async function cancelRes(rid, name) {
+  if (!confirm('Отменить бронь «' + name + '»?\n\nТовар вернётся на склад.')) return;
+
+  var btns = document.querySelectorAll('.cancel-res-btn');
+  btns.forEach(function(b){ b.disabled = true; b.style.opacity = '.5'; });
+
+  var resp = await fetch('/api/team/cancel_reservation/' + rid, { method: 'POST' });
+  var d = await resp.json();
+
+  if (d.ok) {
+    updateStats();
+    toast('Бронь отменена', 'info');
+    setTimeout(function(){ location.reload(); }, 700);
+  } else {
+    toast('✗ ' + d.error, 'err');
+    btns.forEach(function(b){ b.disabled = false; b.style.opacity = '1'; });
+  }
+}
+
+/* ── ASSIGNMENTS ── */
+function toggleSubj(header) {
+  header.classList.toggle('open');
+  var body = header.nextElementSibling;
+  body.classList.toggle('open');
+}
+
+// Track wrong attempts: id -> count
+var wrongAttempts = {};
+
+async function sendAns(id) {
+  var inp = document.getElementById('ans'  + id);
+  var res = document.getElementById('ar'   + id);
+  var btn = document.getElementById('abtn' + id);
+  var card= document.getElementById('ac'   + id);
+  var val = (inp.value || '').trim();
+  if (!val || btn.disabled) return;
+
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  var resp = await fetch('/api/team/submit_answer', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ assignment_id: id, answer: val })
+  });
+  var d = await resp.json();
+
+  res.style.display = 'block';
+
+  if (d.ok) {
+    // Correct answer — lock everything
+    res.className = 'ares ok';
+    res.textContent = '✓ Верно! +' + d.points + ' очков. Баланс: ' + d.balance + ' оч.';
+    inp.disabled = true;
+    btn.disabled = true;
+    btn.textContent = '✓';
+    btn.style.background = 'linear-gradient(135deg,var(--gr),#00a050)';
+    card.classList.add('solved');
+    toast('🎉 +' + d.points + ' очков!', 'pts');
+    updateStats();
+  } else if (d.error === 'Нет доступа') {
+    res.className = 'ares err';
+    res.textContent = '⚠️ Сессия истекла. Перенаправление...';
+    setTimeout(function(){ window.location.href = '/login'; }, 2000);
+  } else {
+    // Wrong answer — increment counter, lock after 3 wrong
+    wrongAttempts[id] = (wrongAttempts[id] || 0) + 1;
+    var attempts = wrongAttempts[id];
+    var MAX = 3;
+    var left = MAX - attempts;
+
+    if (left <= 0) {
+      // Lock permanently
+      res.className = 'ares err';
+      res.textContent = '✗ Неверный ответ. Попытки исчерпаны.';
+      res.style.display = 'block';
+      inp.disabled = true;
+      inp.value = '';
+      inp.placeholder = 'Попытки исчерпаны';
+      btn.disabled = true;
+      btn.textContent = '✕';
+      btn.classList.add('wrong-state');
+      card.classList.add('wrong');
+      var hint = document.createElement('div');
+      hint.className = 'wrong-hint';
+      hint.textContent = '🔒 Задание заблокировано для вашей команды';
+      card.appendChild(hint);
+    } else {
+      // Show error, clear input, keep button
+      res.className = 'ares err';
+      res.textContent = '✗ Неверный ответ. Осталось попыток: ' + left;
+      inp.value = '';
+      inp.style.borderColor = 'var(--rd)';
+      btn.disabled = false;
+      btn.textContent = 'ОТВЕТИТЬ';
+      setTimeout(function(){
+        inp.style.borderColor = '';
+      }, 1500);
+      inp.focus();
+    }
+  }
+}
+
+/* ── STATS UPDATE ── */
+async function updateStats() {
+  try {
+    var resp = await fetch('/api/team/info');
+    var d = await resp.json();
+    if (!d.ok) return;
+    // Update balance everywhere
+    ['hBal','stBal'].forEach(function(id){ var e=document.getElementById(id); if(e) e.textContent=d.balance; });
+    var e;
+    e=document.getElementById('stSp'); if(e) e.textContent=d.spent;
+    e=document.getElementById('stWt'); if(e) e.textContent=d.weight.toFixed(1);
+    e=document.getElementById('stAs'); if(e) e.textContent=d.assignments;
+    // Update hbal-sub
+    var sub=document.querySelector('.hbal-sub');
+    if(sub) sub.textContent='из '+d.start_budget+' очков';
+  } catch(e) {}
+}
+
+/* ── TOAST ── */
+function toast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (type || 'ok') + ' show';
+  setTimeout(function(){ t.classList.remove('show'); }, 4500);
+}
+
+/* ── GAME TIMER ── */
+var gameEndsAt = null;
+var gameTotalS = null;
+var gameLocked = false;
+
+async function pollGame() {
+  try {
+    var r = await fetch('/api/game/status');
+    var d = await r.json();
+    if (!d.ok) return;
+
+    if (d.status === 'finished' && !gameLocked) {
+      lockScreen();
+      return;
+    }
+    if (d.status !== 'running') return;
+
+    if (!gameEndsAt) {
+      gameEndsAt = new Date(d.ends_at.replace(' ', 'T'));
+      gameTotalS = d.left_s + (Date.now() / 1000 - new Date(d.started_at.replace(' ','T')).getTime()/1000);
+      document.getElementById('gWidget').style.display = 'flex';
+    }
+    updateGameTimer();
+  } catch(e) {}
+}
+
+function updateGameTimer() {
+  if (!gameEndsAt || gameLocked) return;
+  var left = Math.max(0, (gameEndsAt - Date.now()) / 1000);
+  var h = Math.floor(left / 3600);
+  var m = Math.floor((left % 3600) / 60);
+  var s = Math.floor(left % 60);
+  var val = (h > 0 ? String(h).padStart(2,'0') + ':' : '') +
+            String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+
+  var el  = document.getElementById('gVal');
+  var wid = document.getElementById('gWidget');
+  var fil = document.getElementById('gFill');
+  if (el)  el.textContent = val;
+  if (wid) wid.className  = 'gtimer-widget' + (left < 60 ? ' danger' : left < 300 ? ' warn' : '');
+  if (fil && gameTotalS) fil.style.width = Math.max(0, (left / gameTotalS) * 100) + '%';
+
+  if (left <= 0) { lockScreen(); return; }
+  setTimeout(updateGameTimer, 500);
+}
+
+function lockScreen() {
+  if (gameLocked) return;
+  gameLocked = true;
+  var ls = document.getElementById('lockScreen');
+  if (ls) ls.classList.add('show');
+  // Disable all inputs
+  document.querySelectorAll('input,button,select,textarea').forEach(function(el){
+    el.disabled = true;
+  });
+}
+
+// Poll every 3s, start immediately
+/* ── AUTO-REFRESH ── */
+var _refreshInterval = 10000;  // default 10s, overridden from server
+var _refreshTimer    = null;
+
+async function initRefresh() {
+  try {
+    var r = await fetch('/api/settings/public');
+    var d = await r.json();
+    if (d.ok && d.refresh_interval_s) {
+      _refreshInterval = Math.max(3, d.refresh_interval_s) * 1000;
+    }
+  } catch(e) {}
+  scheduleRefresh();
+}
+
+function scheduleRefresh() {
+  clearTimeout(_refreshTimer);
+  _refreshTimer = setTimeout(function() {
+    updateStats();
+    scheduleRefresh();
+  }, _refreshInterval);
+}
+
+// Call updateStats immediately when page becomes visible (tab switch / screen wake)
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden) updateStats();
+});
+
+// Game timer still polls every 3s (for accurate countdown)
+pollGame();
+setInterval(pollGame, 3000);
+
+// Stats refresh from server setting
+initRefresh();
+</script>
+</body>
+</html>

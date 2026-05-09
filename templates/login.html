@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Вход — Инженерный Хакатон</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Exo+2:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#060d16;color:#e8f4fd;font-family:'Exo 2',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.card{background:#0b1929;border:1px solid #1a3356;border-radius:16px;padding:40px;width:380px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+h1{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:900;color:#00c8f0;margin-bottom:6px;text-align:center}
+.sub{color:#527090;font-size:13px;text-align:center;margin-bottom:28px}
+label{display:block;font-size:11px;color:#527090;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+input{width:100%;padding:12px 14px;background:rgba(255,255,255,.05);border:1px solid #1a3356;border-radius:9px;color:#e8f4fd;font-family:'Exo 2',sans-serif;font-size:15px;outline:none;margin-bottom:16px}
+input:focus{border-color:#00c8f0}
+.group{margin-bottom:4px}
+button{width:100%;padding:14px;background:linear-gradient(135deg,#00c8f0,#007090);border:none;border-radius:9px;color:#000;font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:1px;margin-top:4px;transition:opacity .2s}
+button:hover{opacity:.9}
+button:disabled{opacity:.5;cursor:default}
+.err{background:rgba(255,82,82,.1);border:1px solid #ff5252;color:#ff5252;border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px}
+.info{background:rgba(0,200,240,.07);border:1px solid rgba(0,200,240,.3);color:#00c8f0;border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;display:none}
+.spinner{display:none;text-align:center;padding:8px 0;color:#527090;font-size:13px}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>🏗️ ИНЖЕНЕРНЫЙ ХАКАТОН</h1>
+  <div class="sub">Система управления квестом</div>
+
+  <div class="info" id="autoInfo">🔄 Восстанавливаем сессию...</div>
+  {% if error %}<div class="err">{{ error }}</div>{% endif %}
+  <div class="err" id="jsErr" style="display:none"></div>
+
+  <form id="loginForm" method="post" action="/login">
+    <div class="group">
+      <label>Логин команды</label>
+      <input name="login" id="loginInput" placeholder="Название команды" autocomplete="username">
+    </div>
+    <div class="group">
+      <label>Пароль</label>
+      <input name="password" id="passInput" type="password" placeholder="••••••" autocomplete="current-password">
+    </div>
+    <div class="spinner" id="spinner">⏳ Вход...</div>
+    <button type="submit" id="submitBtn">ВОЙТИ</button>
+  </form>
+</div>
+
+<script>
+// If user explicitly logged out — clear saved credentials
+if (window.location.search.indexOf('logout=1') >= 0) {
+  localStorage.removeItem('quest_login');
+  localStorage.removeItem('quest_pass');
+  // Clean URL
+  window.history.replaceState({}, '', '/login');
+}
+
+var AUTO_KEY_LOGIN = 'quest_login';
+var AUTO_KEY_PASS  = 'quest_pass';
+
+// Try auto-login on page load
+(async function() {
+  var savedLogin = localStorage.getItem(AUTO_KEY_LOGIN);
+  var savedPass  = localStorage.getItem(AUTO_KEY_PASS);
+  if (!savedLogin || !savedPass) return;
+
+  // Pre-fill form visually
+  document.getElementById('loginInput').value = savedLogin;
+  document.getElementById('passInput').value  = savedPass;
+
+  var info = document.getElementById('autoInfo');
+  var btn  = document.getElementById('submitBtn');
+  info.style.display = 'block';
+  info.textContent   = '🔄 Восстанавливаем сессию «' + savedLogin + '»...';
+  btn.disabled = true;
+
+  try {
+    var r = await fetch('/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ login: savedLogin, password: savedPass })
+    });
+    var d = await r.json();
+
+    if (d.ok) {
+      info.textContent = '✅ Добро пожаловать, ' + savedLogin + '!';
+      // Redirect based on role
+      if (d.role === 'Магазин')       { window.location.href = '/shop';  return; }
+      if (d.role === 'Администратор') { window.location.href = '/admin'; return; }
+      window.location.href = '/team';
+    } else {
+      // Credentials changed or game not started — show form
+      info.style.display = 'none';
+      btn.disabled = false;
+      if (d.error && d.error.indexOf('Игра') >= 0) {
+        var e = document.getElementById('jsErr');
+        e.textContent = d.error;
+        e.style.display = 'block';
+      }
+      // Clear saved creds only if wrong password (not if game not started)
+      if (!d.error || d.error.indexOf('Игра') < 0) {
+        localStorage.removeItem(AUTO_KEY_LOGIN);
+        localStorage.removeItem(AUTO_KEY_PASS);
+      }
+    }
+  } catch(e) {
+    info.style.display = 'none';
+    btn.disabled = false;
+  }
+})();
+
+// Save credentials on successful form submit
+document.getElementById('loginForm').addEventListener('submit', function() {
+  var login = document.getElementById('loginInput').value.trim();
+  var pass  = document.getElementById('passInput').value;
+  if (login && pass) {
+    localStorage.setItem(AUTO_KEY_LOGIN, login);
+    localStorage.setItem(AUTO_KEY_PASS,  pass);
+  }
+  document.getElementById('spinner').style.display = 'block';
+  document.getElementById('submitBtn').disabled = true;
+});
+</script>
+</body>
+</html>
