@@ -6,14 +6,22 @@ nfc_bridge.py — Мост между RC522 (Arduino/ESP) и Flask-сервер�
 Запуск:
     python nfc_bridge.py              # авто-поиск COM-порта
     python nfc_bridge.py COM3         # явно указать порт
+    python nfc_bridge.py COM3 http://192.168.1.100:5000
 
 Установка (важно: именно pyserial, не serial!):
     pip uninstall serial               # удалить конфликтующий пакет
     pip install pyserial               # установить правильный
+
+Переменные окружения:
+    NFC_SERVER_URL    — URL сервера (по умолчанию http://127.0.0.1:5000/api/nfc/push)
+    NFC_PORT          — COM-порт (если не указан в аргументе)
+    NFC_BAUD_RATE     — скорость (по умолчанию 9600)
+    NFC_READ_TIMEOUT  — timeout чтения в сек (по умолчанию 2)
 """
 
 import sys
 import time
+import os
 import urllib.request
 import urllib.error
 import json
@@ -47,11 +55,20 @@ except ImportError:
     HAS_LIST_PORTS = False
 
 # ── Настройки ─────────────────────────────────────────────────
-SERVER_URL   = "http://127.0.0.1:5000/api/nfc/push"
-BAUD_RATE    = 9600
-READ_TIMEOUT = 2      # сек
-DEBOUNCE_S   = 2.0    # сек — не повторять тот же UID
-RETRY_DELAY  = 5      # сек — пауза при ошибке
+# Приоритет: аргументы командной строки > переменные окружения > значения по умолчанию
+SERVER_URL    = os.getenv('NFC_SERVER_URL', "http://127.0.0.1:5000/api/nfc/push")
+BAUD_RATE     = int(os.getenv('NFC_BAUD_RATE', 9600))
+READ_TIMEOUT  = int(os.getenv('NFC_READ_TIMEOUT', 2))
+DEBOUNCE_S    = 2.0    # сек — не повторять тот же UID
+RETRY_DELAY   = 5      # сек — пауза при ошибке подключения
+MAX_TIMEOUTS  = int(os.getenv('NFC_MAX_TIMEOUTS', 60))  # количество timeout'ов перед переподключением
+
+# Перезаписываем если указаны в аргументах
+if len(sys.argv) > 2:
+    SERVER_URL = sys.argv[2]
+
+print(f"[Config] SERVER_URL: {SERVER_URL}")
+print(f"[Config] BAUD_RATE: {BAUD_RATE}, READ_TIMEOUT: {READ_TIMEOUT}s\n")
 
 # ── Поиск COM-порта ───────────────────────────────────────────
 
@@ -71,7 +88,7 @@ def find_port():
 
     print("Найдены COM-порты:")
     for p in ports:
-        # Исправка: используем :<15 для совместимости с длинными портами Linux
+        # ✅ Исправка: используем :<15 для совместимости с длинными портами Linux
         print(f"  {p.device:<15} — {p.description}")
 
     keywords = [
@@ -110,6 +127,7 @@ def find_port_windows_fallback():
 # ── Отправка на сервер ────────────────────────────────────────
 
 def send_uid(uid: str) -> bool:
+    """Отправляет UID на Flask-сервер."""
     payload = json.dumps({"uid": uid}).encode("utf-8")
     req = urllib.request.Request(
         SERVER_URL,
@@ -164,6 +182,7 @@ def wait_for_arduino_ready(ser, timeout=5):
 
 
 def run(port: str) -> bool:
+    """Основной цикл работы с Arduino."""
     print(f"\n[RC522] Подключаюсь к {port} @ {BAUD_RATE} бод...")
     try:
         ser = serial.Serial(port, BAUD_RATE, timeout=READ_TIMEOUT)
@@ -186,7 +205,6 @@ def run(port: str) -> bool:
     last_uid      = ""
     last_uid_time = 0.0
     no_data_count = 0  # счётчик timeout'ов
-    MAX_TIMEOUTS  = 60  # если 60 раз подряд нет данных, переподключаемся
 
     try:
         while True:
@@ -217,6 +235,7 @@ def run(port: str) -> bool:
 
             print(f"[Serial] {line}")
 
+            # Фильтруем только UID-строки
             if not line.startswith("UID:"):
                 continue
 
@@ -225,6 +244,13 @@ def run(port: str) -> bool:
                 continue
 
             now = time.time()
+            
+            # ✅ ИСПРАВЛЕНА ЛОГИКА DEBOUNCE:
+            # Пропускаем если:
+            # - UID одинаковый И прошло МЕНЬШЕ 2 сек
+            # Отправляем если:
+            # - UID другой ИЛИ
+            # - UID одинаковый НО прошло >= 2 сек (повторное сканирование)
             if uid == last_uid and (now - last_uid_time) < DEBOUNCE_S:
                 print(f"  [~] Дублирование — пропускаю")
                 continue
@@ -242,34 +268,45 @@ def run(port: str) -> bool:
     finally:
         ser.close()
 
-    return True
+    return False  # ✅ Всегда возвращаем False для переподключения
 
 
 def main():
     # Определяем порт
     if len(sys.argv) > 1:
         port = sys.argv[1]
-        print(f"[RC522] Порт из аргумента: {port}")
+        print(f"[RC522] Порт из аргумента: {port}\n")
     else:
-        port = find_port()
-        if not port:
-            # Запасной вариант для Windows
-            port = find_port_windows_fallback()
-        if not port:
-            print("\n[!] Не удалось найти порт автоматически.")
-            print("    Запустите с явным указанием порта:")
-            print("    python nfc_bridge.py COM3")
-            print("\n    Какой порт? Arduino IDE → Инструменты → Порт")
-            sys.exit(1)
-
-    # Цикл переподключения
-    while True:
-        ok = run(port)
-        if not ok:
-            print(f"\n[RC522] Переподключение через {RETRY_DELAY} сек...")
-            time.sleep(RETRY_DELAY)
+        port_env = os.getenv('NFC_PORT')
+        if port_env:
+            port = port_env
+            print(f"[RC522] Порт из переменной NFC_PORT: {port}\n")
         else:
-            break
+            port = find_port()
+            if not port:
+                # Запасной вариант для Windows
+                port = find_port_windows_fallback()
+            if not port:
+                print("\n[!] Не удалось найти порт автоматически.")
+                print("    Запустите с явным указанием порта:")
+                print("    python nfc_bridge.py COM3")
+                print("\n    Или установите переменную окружения:")
+                print("    export NFC_PORT=COM3  # Linux/Mac")
+                print("    set NFC_PORT=COM3     # Windows")
+                print("\n    Какой порт? Arduino IDE → Инструменты → Порт")
+                sys.exit(1)
+
+    # ✅ Цикл переподключения - теперь БЕСКОНЕЧНЫЙ (без break)
+    reconnect_count = 0
+    while True:
+        reconnect_count += 1
+        if reconnect_count > 1:
+            print(f"\n[RC522] Попытка переподключения #{reconnect_count}...")
+        
+        run(port)
+        
+        print(f"\n[RC522] Переподключение через {RETRY_DELAY} сек...")
+        time.sleep(RETRY_DELAY)
 
 
 if __name__ == "__main__":
